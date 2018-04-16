@@ -49,8 +49,8 @@ class Boom(Subsystem):
 
         # Add soft limits
         self.talon.configForwardSoftLimitThreshold(self.FORWARD_SOFT_LIMIT, 0)
-        # self.talon.configReverseSoftLimitThreshold(self.REVERSE_SOFT_LIMIT, 0)
         self.talon.configForwardSoftLimitEnable(True, 0)
+        # self.talon.configReverseSoftLimitThreshold(self.REVERSE_SOFT_LIMIT, 0)
         # self.talon.configReverseSoftLimitEnable(True, 0)
 
         # PIDF slot index 0 is for intake-to-switch
