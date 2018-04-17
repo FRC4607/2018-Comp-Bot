@@ -73,6 +73,7 @@ class Pitchfork(TimedRobot):
 
         # Boom state start at the scale
         self.boomState = BOOM_STATE.Scale
+
     def disabledInit(self):
         """
         Initialization code for disabled mode should go here.  This method will be called each
@@ -117,83 +118,89 @@ class Pitchfork(TimedRobot):
         logger.info("Starting Position %s" % (self.startingPosition))
         logger.info("Scoring Element %s" % (self.scoringElement))
 
-        # Starting on the left side
-        if self.startingPosition == "Left":
+        self.autonForward = AutonForward(self)
+        self.autonForward.start()
 
-            # Want to do scale
-            if self.scoringElement == "Scale":
-                if self.gameData[1] == "L":
-                    logger.info("Start Left, Left Scale")
 
-                elif self.gameData[1] == "R" and self.crossFieldEnable:
-                    logger.info("Start Left, Right Scale")
-
-                elif self.gameData[0] == "L":
-                    logger.info("Start Left, Left Switch")
-
-                else:
-                    logger.info("Start Left, Go Forward")
-                    self.autonForward = AutonForward(self)
-                    self.autonForward.start()
-
-            # Want to do the switch
-            elif self._scoringElement == "Switch":
-                if self.gameData[0] == "L":
-                    logger.info("Start Left, Left Switch")
-
-                elif self.gameData[0] == "R" and self.crossFieldEnable:
-                    logger.info("Start Left, Right Switch")
-
-                elif self.gameData[1] == "L":
-                    logger.info("Start Left, Left Scale")
-
-                else:
-                    logger.info("Start Left, Go Forward")
-                    self.autonForward = AutonForward(self)
-                    self.autonForward.start()
-
-        # Starting on the right side
-        elif self._startingPosition == "Right":
-
-            # Want to do scale
-            if self._scoringElement == "Scale":
-                if self.gameData[1] == "R":
-                    logger.info("Start Right, Right Scale")
-
-                elif self.gameData[1] == "L" and self.crossFieldEnable:
-                    logger.info("Start Right, Left Scale")
-
-                elif self.gameData[0] == "R":
-                    logger.info("Start Right, Right Switch")
-
-                else:
-                    logger.info("Start Right, Go Forward")
-                    self.autonForward = AutonForward(self)
-                    self.autonForward.start()
-
-            # Want to do the switch
-            elif self.scoringElement == "Switch":
-                if self.gameData[0] == "R":
-                    logger.info("Start Right, Right Switch")
-
-                elif self.gameData[0] == "L" and self.crossFieldEnable:
-                    logger.info("Start Right, Left Switch")
-
-                elif self.gameData[1] == "R":
-                    logger.info("Start Right, Right Scale")
-
-                else:
-                    logger.info("Start Right, Go Forward")
-                    self.autonForward = AutonForward(self)
-                    self.autonForward.start()
-
-        # Starting in the middle
-        elif self.startingPosition == "Middle":
-            if self.gameData[0] == "R":
-                logger.info("Start Middle, Right Switch")
-
-            elif self.gameData[0] == "L":
-                logger.info("Start Middle, Left Switch")
+#==================================================================================================
+#         # Starting on the left side
+#         if self.startingPosition == "Left":
+# 
+#             # Want to do scale
+#             if self.scoringElement == "Scale":
+#                 if self.gameData[1] == "L":
+#                     logger.info("Start Left, Left Scale")
+# 
+#                 elif self.gameData[1] == "R" and self.crossFieldEnable:
+#                     logger.info("Start Left, Right Scale")
+# 
+#                 elif self.gameData[0] == "L":
+#                     logger.info("Start Left, Left Switch")
+# 
+#                 else:
+#                     logger.info("Start Left, Go Forward")
+#                     self.autonForward = AutonForward(self)
+#                     self.autonForward.start()
+# 
+#             # Want to do the switch
+#             elif self._scoringElement == "Switch":
+#                 if self.gameData[0] == "L":
+#                     logger.info("Start Left, Left Switch")
+# 
+#                 elif self.gameData[0] == "R" and self.crossFieldEnable:
+#                     logger.info("Start Left, Right Switch")
+# 
+#                 elif self.gameData[1] == "L":
+#                     logger.info("Start Left, Left Scale")
+# 
+#                 else:
+#                     logger.info("Start Left, Go Forward")
+#                     self.autonForward = AutonForward(self)
+#                     self.autonForward.start()
+# 
+#         # Starting on the right side
+#         elif self._startingPosition == "Right":
+# 
+#             # Want to do scale
+#             if self._scoringElement == "Scale":
+#                 if self.gameData[1] == "R":
+#                     logger.info("Start Right, Right Scale")
+# 
+#                 elif self.gameData[1] == "L" and self.crossFieldEnable:
+#                     logger.info("Start Right, Left Scale")
+# 
+#                 elif self.gameData[0] == "R":
+#                     logger.info("Start Right, Right Switch")
+# 
+#                 else:
+#                     logger.info("Start Right, Go Forward")
+#                     self.autonForward = AutonForward(self)
+#                     self.autonForward.start()
+# 
+#             # Want to do the switch
+#             elif self.scoringElement == "Switch":
+#                 if self.gameData[0] == "R":
+#                     logger.info("Start Right, Right Switch")
+# 
+#                 elif self.gameData[0] == "L" and self.crossFieldEnable:
+#                     logger.info("Start Right, Left Switch")
+# 
+#                 elif self.gameData[1] == "R":
+#                     logger.info("Start Right, Right Scale")
+# 
+#                 else:
+#                     logger.info("Start Right, Go Forward")
+#                     self.autonForward = AutonForward(self)
+#                     self.autonForward.start()
+# 
+#         # Starting in the middle
+#         elif self.startingPosition == "Middle":
+#             if self.gameData[0] == "R":
+#                 logger.info("Start Middle, Right Switch")
+# 
+#             elif self.gameData[0] == "L":
+#                 logger.info("Start Middle, Left Switch")
+#==================================================================================================
 
     def autonomousPeriodic(self):
         """

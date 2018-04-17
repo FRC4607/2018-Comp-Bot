@@ -8,3 +8,6 @@
 /intake_motors_out.cpython-36.pyc
 /intake_pneumatics_open_close.cpython-36.pyc
 /shoot_cube_into_scale.cpython-36.pyc
+/boom_intake_to_switch_motion_profile.cpython-36.pyc
+/intake_motors_switch_out_fast.cpython-36.pyc
+/intake_motors_switch_out_slow.cpython-36.pyc

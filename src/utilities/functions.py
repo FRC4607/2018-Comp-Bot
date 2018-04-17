@@ -1,3 +1,4 @@
+import math
 import pickle
 import os.path
 from constants import *
@@ -37,7 +38,9 @@ def CalculateFeedForwardVoltage(leftSide, velocity, acceleration):
 def GeneratePath(path_name, file_name, waypoints):
     """
     This function will take a set of pathfinder waypoints and create the trajectories to follow
-    a path going through the waypoints.
+    a path going through the waypoints.  This path is specific for the drivetrain controllers,
+    so the position will use the CTRE quadrature encoders and the velocity will use the feed-
+    forward in units of Volts.
     """
     # Generate the path
     info, trajectory = pf.generate(waypoints, pf.FIT_HERMITE_QUINTIC, 1000000,
@@ -60,13 +63,13 @@ def GeneratePath(path_name, file_name, waypoints):
                  "L_x, L_y, L_pos, L_vel, L_acc, L_heading, "
                  "R_x, R_y, R_pos, R_vel, R_acc, R_heading\n")
     for i in range(len(leftTrajectory)):
-        path["left"].append([leftTrajectory[i].position,
+        path["left"].append([leftTrajectory[i].position * 4096 / (ROBOT_WHEEL_DIAMETER_FT * math.pi),
                              CalculateFeedForwardVoltage(True,
                                                          leftTrajectory[i].velocity,
                                                          leftTrajectory[i].acceleration),
                              pf.r2d(leftTrajectory[i].heading),
                              int(leftTrajectory[i].dt * 1000)])
-        path["right"].append([rightTrajectory[i].position,
+        path["right"].append([rightTrajectory[i].position * 4096 / (ROBOT_WHEEL_DIAMETER_FT * math.pi),
                               CalculateFeedForwardVoltage(False,
                                                           rightTrajectory[i].velocity,
                                                           rightTrajectory[i].acceleration),
