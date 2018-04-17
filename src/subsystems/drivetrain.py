@@ -59,6 +59,10 @@ class DriveTrain(Subsystem):
         # Diable the motor-safety
         self.diffDrive.setSafetyEnabled(False)
 
+        # Enable brake mode
+        self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
+        self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
+
         # This function will intiliaze the drivetrain motor controllers to the factory defaults.
         # Only values which do not match the factory default will be written.  Any values which
         # are explicity listed will be skipped (ie any values written prior in this method).
@@ -75,9 +79,22 @@ class DriveTrain(Subsystem):
         self.rightTalon.configVoltageCompSaturation(12.0, 10)
         self.rightTalon.enableVoltageCompensation(True)
 
-        # Enable brake mode
-        self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
-        self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
+        # PIDF slot index 0 is for autonomous
+        # There are 4096 encoder units per rev.  1 rev of the wheel is pi * diameter.  That
+        # evaluates to 2607.6 encoder units per foot.  For the feed-forward system, we expect very
+        # tight position control, so use a P-gain which drives full throttle at 8" of error.  This
+        # evaluates to 0.588 = (1.0 * 1023) / (8 / 12 * 2607.6)
+        self.leftTalon.config_kP(0, 0.6, 10)
+        self.leftTalon.config_kI(0, 0.0, 10)
+        self.leftTalon.config_kD(0, 0.0, 10)
+        self.leftTalon.config_kF(0, 1023 / 12, 10)   # 10-bit ADC / 12 V
+        self.rightTalon.config_kP(0, 0.6, 10)
+        self.rightTalon.config_kI(0, 0.0, 10)
+        self.rightTalon.config_kD(0, 0.0, 10)
+        self.rightTalon.config_kF(0, 1023 / 12, 10)  # 10-bit ADC / 12 V
+
+        # Initilaize the quadrature encoders
+        self.initQuadratureEncoder()
 
     def initQuadratureEncoder(self):
         """
