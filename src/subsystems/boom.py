@@ -29,15 +29,17 @@ class Boom(Subsystem):
         # Map the CIM motors to the TalonSRX's
         self.talon = WPI_TalonSRX(BOOM_MOTOR)
 
-        # Map the analog potentiometer of the linear actuator
-
         # Setup the default motor controller setup
-        self.initControllerSetup()
+        self.initOpenLoop()
+        self.initClosedLoop()
 
-    def initControllerSetup(self):
+    def initOpenLoop(self):
         """
         This method will setup the default settings of the motor controllers.
         """
+        # Set to percent output mode at neutral
+        self.talon.set(WPI_TalonSRX.ControlMode.PercentOutput, 0.0)
+
         # Add a ramp-rate limiter to joystick control
         self.talon.configOpenLoopRamp(0.2, 10)
 
@@ -53,6 +55,7 @@ class Boom(Subsystem):
         # self.talon.configReverseSoftLimitThreshold(self.REVERSE_SOFT_LIMIT, 0)
         # self.talon.configReverseSoftLimitEnable(True, 0)
 
+    def initClosedLoop(self):
         # PIDF slot index 0 is for intake-to-switch
         self.talon.config_kP(0, 1.0, 10)
         self.talon.config_kI(0, 0.0, 10)
@@ -65,11 +68,8 @@ class Boom(Subsystem):
         self.talon.config_kD(1, 0.0, 10)
         self.talon.config_kF(1, 22.73, 10)
 
-        # This function will intiliaze the drivetrain motor controllers to the factory defaults.
-        # Only values which do not match the factory default will be written.  Any values which
-        # are explicity listed will be skipped (ie any values written prior in this method).
-
-        #  ***** TODO *****  #
+        # Use analog potentiometer
+        self.initAnalogPotentiometer()
 
     def initAnalogPotentiometer(self):
         """
