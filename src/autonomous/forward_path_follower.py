@@ -45,10 +45,12 @@ class ForwardPathFollower(Command):
 
         self.leftFollower = MotionProfileController(self.robot.driveTrain.leftTalon,
                                                     self.path['left'],
+                                                    False,
                                                     self.robot.driveTrain.MP_SLOT0_SELECT,
                                                     self.robot.driveTrain.MP_SLOT1_SELECT)
         self.rightFollower = MotionProfileController(self.robot.driveTrain.rightTalon,
                                                      self.path['right'],
+                                                     False,
                                                      self.robot.driveTrain.MP_SLOT0_SELECT,
                                                      self.robot.driveTrain.MP_SLOT1_SELECT)
         self.leftFollower.start()
