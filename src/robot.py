@@ -73,7 +73,6 @@ class Pitchfork(TimedRobot):
 
         # Boom state start at the scale
         self.boomState = BOOM_STATE.Scale
-
     def disabledInit(self):
         """
         Initialization code for disabled mode should go here.  This method will be called each

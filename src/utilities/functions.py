@@ -65,13 +65,13 @@ def GeneratePath(path_name, file_name, waypoints):
                                                          leftTrajectory[i].velocity,
                                                          leftTrajectory[i].acceleration),
                              pf.r2d(leftTrajectory[i].heading),
-                             leftTrajectory[i].dt])
+                             int(leftTrajectory[i].dt * 1000)])
         path["right"].append([rightTrajectory[i].position,
                               CalculateFeedForwardVoltage(False,
                                                           rightTrajectory[i].velocity,
                                                           rightTrajectory[i].acceleration),
                               pf.r2d(rightTrajectory[i].heading),
-                              rightTrajectory[i].dt])
+                              int(rightTrajectory[i].dt * 1000)])
 
         # It's easier to see the path when plotting the X data as the Y-axis and the Y data as the
         # X-axis in openoffice.
@@ -144,7 +144,7 @@ def GenerateMotionProfile(motion_profile_name, file_name, trajectory,
         path.append([trajectory[i].position * position_units,
                      trajectory[i].velocity * velocity_units,
                      0.0,  # No heading is used for single-axis
-                     trajectory[i].dt])
+                     int(trajectory[i].dt * 1000)])
 
         output.write("%3.4f, %3.4f, %3.4f, %1.3f\n" %
                      (trajectory[i].position, trajectory[i].velocity,

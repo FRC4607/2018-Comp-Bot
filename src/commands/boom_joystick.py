@@ -19,7 +19,10 @@ class BoomJoystick(Command):
         # Get the joystick inputs.  -'ve is up and +'ve is down, joytick up returns -'ve
         boomThrottle = -self.robot.oi.operatorJoystick.getY()
 
-        # Only apply joystick when reading a 10% throttle
-        if boomThrottle > 0.1 or boomThrottle < -0.1:
-            self.robot.boom.talon.set(WPI_TalonSRX.ControlMode.PercentOutput, boomThrottle)
+        # Only apply joystick when reading a 5% throttle
+        if boomThrottle < 0.05 and boomThrottle > -0.05:
+            boomThrottle = 0.0
+        else:
             self.robot.boomState = BOOM_STATE.Unknown
+            
+        self.robot.boom.talon.set(WPI_TalonSRX.ControlMode.PercentOutput, boomThrottle)

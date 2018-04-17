@@ -150,6 +150,7 @@ class MotionProfileController():
             self._finished = True
 
             # Remove the reference to the notifier and hopefully the notifier will be stopped
+            self._notifier.free()
             del(self._notifier)
 
     def _initialize(self):
@@ -173,7 +174,7 @@ class MotionProfileController():
         This method will move the trajectory points from the top-buffer to the bottom-buffer.
         """
         if self._debugCnt == 0:
-            if self.finished:
+            if self._finished:
                 logger.warning('Motion Profile Controller notifier is running')
             self._debugCnt = self.NOTIFIER_DEBUG_CNT
         else:

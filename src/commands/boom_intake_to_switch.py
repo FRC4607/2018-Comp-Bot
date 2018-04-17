@@ -30,7 +30,7 @@ class BoomIntakeToSwitch(Command):
         # and log it.
         startPotError = abs(self.robot.boom.getPotPositionInDegrees() -
                             self.robot.boom.POT_STARTING_POSITION_DEG)
-        if BOOM_STATE.Intake or startPotError < 45.0:
+        if self.robot.boomState == BOOM_STATE.Intake or startPotError < 90.0:
 
             # References to the talon PIDF slot index and the encoder tics per revolution
             slotIndex = self.robot.boom.INTAKE_TO_SWITCH_SLOT_INDEX
@@ -44,8 +44,8 @@ class BoomIntakeToSwitch(Command):
             # The start method will signal the motion profile controller to start
             self.motionProfileController.start()
         else:
-            logger.warning("Boom Intake to Switch Command not started - StartPotError: %3.1f" %
-                           (startPotError))
+            logger.warning("Boom Intake to Switch Command not started - StartPotError: %3.1f,"
+                           "BoomState: %s" % (startPotError, self.robot.boomState))
             self.finished = True
 
     def execute(self):
@@ -57,10 +57,6 @@ class BoomIntakeToSwitch(Command):
 
             # Output debug data to the smartdashboard
             if LOGGER_LEVEL == logging.DEBUG:
-                self.robot.smartDashboard.putNumber("BItS_P", self.kP)
-                self.robot.smartDashboard.putNumber("BItS_I", self.kI)
-                self.robot.smartDashboard.putNumber("BItS_D", self.kD)
-                self.robot.smartDashboard.putNumber("BItS_F", self.kF)
                 self.robot.smartDashboard.putNumber("BItS_EncPos",
                                                     self.robot.boom.getPotPositionInDegrees())
                 self.robot.smartDashboard.putNumber("BItS_ActPos",
