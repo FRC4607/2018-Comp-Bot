@@ -5,8 +5,8 @@ from ctre.wpi_talonsrx import WPI_TalonSRX
 from robotpy_ext.common_drivers.navx import AHRS
 from commands.drive_joystick import DriveJoystick
 from constants import DRIVETRAIN_FRONT_LEFT_MOTOR, DRIVETRAIN_REAR_LEFT_MOTOR, \
-    DRIVETRAIN_FRONT_RIGHT_MOTOR, DRIVETRAIN_REAR_RIGHT_MOTOR, \
-    TALON_DEFAULT_QUADRATURE_STATUS_FRAME_PERIOD_MS, LOGGER_LEVEL
+    DRIVETRAIN_FRONT_RIGHT_MOTOR, DRIVETRAIN_REAR_RIGHT_MOTOR, LOGGER_LEVEL, \
+    TALON_DEFAULT_QUADRATURE_STATUS_FRAME_PERIOD_MS, TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(LOGGER_LEVEL)
@@ -45,9 +45,6 @@ class DriveTrain(Subsystem):
         # Setup the default motor controller setup
         self.initControllerSetup()
 
-        # Create the NavX gyro instance
-        self.navX = AHRS.create_spi()
-
     def initControllerSetup(self):
         """
         This method will setup the default settings of the motor controllers.
@@ -59,7 +56,7 @@ class DriveTrain(Subsystem):
         # Diable the motor-safety
         self.diffDrive.setSafetyEnabled(False)
 
-        # Enable brake mode
+        # Enable brake/coast mode
         self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Coast)
         self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Coast)
 
@@ -69,12 +66,11 @@ class DriveTrain(Subsystem):
 
         #  ***** TODO *****  #
 
-    def initiaizeDrivetrainMotionProfileControllers(self):
+    def initiaizeDrivetrainMotionProfileControllers(self, stream_rate):
         """
         This method will initialize the Talon's for motion profiling
         """
-
-        # Invert right motors and feedback sensor phase
+        # Invert right motors
         self.rightTalon.setInverted(True)
         self.frontRight.setInverted(True)
 
@@ -101,12 +97,24 @@ class DriveTrain(Subsystem):
         # Initilaize the quadrature encoders
         self.initQuadratureEncoder()
 
+        # Change the control frame period
+        self.leftTalon.changeMotionControlFramePeriod(stream_rate)
+        self.rightTalon.changeMotionControlFramePeriod(stream_rate)
+
+
     def cleanUpDrivetrainMotionProfileControllers(self):
         '''
-        This mothod will leave the Talon's motion profiling
+        This mothod will be called to cleanup the Talon's motion profiling
         '''
+        # Invert right motors again so the open-loop joystick driving works
         self.rightTalon.setInverted(False)
         self.frontRight.setInverted(False)
+
+        # Change the control frame period back to the default
+        framePeriod = TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS / 1000
+        self.leftTalon.changeMotionControlFramePeriod(framePeriod)
+        self.rightTalon.changeMotionControlFramePeriod(framePeriod)
+
 
     def initQuadratureEncoder(self):
         """
