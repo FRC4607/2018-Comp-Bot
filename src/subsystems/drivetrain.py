@@ -60,8 +60,8 @@ class DriveTrain(Subsystem):
         self.diffDrive.setSafetyEnabled(False)
 
         # Enable brake mode
-        self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
-        self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
+        self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Coast)
+        self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Coast)
 
         # This function will intiliaze the drivetrain motor controllers to the factory defaults.
         # Only values which do not match the factory default will be written.  Any values which
@@ -73,6 +73,11 @@ class DriveTrain(Subsystem):
         """
         This method will initialize the Talon's for motion profiling
         """
+
+        # Invert right motors and feedback sensor phase
+        self.rightTalon.setInverted(True)
+        self.frontRight.setInverted(True)
+
         # Enable voltage compensation for 12V
         self.leftTalon.configVoltageCompSaturation(12.0, 10)
         self.leftTalon.enableVoltageCompensation(True)
@@ -95,6 +100,13 @@ class DriveTrain(Subsystem):
 
         # Initilaize the quadrature encoders
         self.initQuadratureEncoder()
+
+    def cleanUpDrivetrainMotionProfileControllers(self):
+        '''
+        This mothod will leave the Talon's motion profiling
+        '''
+        self.rightTalon.setInverted(False)
+        self.frontRight.setInverted(False)
 
     def initQuadratureEncoder(self):
         """

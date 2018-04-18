@@ -1,5 +1,5 @@
 from wpilib.command import Command
-from utilities.motion_profile_controller import MotionProfileController
+from utilities.drivetrain_mp_controller import DrivetrainMPController
 import os.path
 import pickle
 import logging
@@ -43,25 +43,27 @@ class ForwardPathFollower(Command):
 
         self.robot.driveTrain.initiaizeDrivetrainMotionProfileControllers()
 
-        self.leftFollower = MotionProfileController(self.robot.driveTrain.leftTalon,
-                                                    self.path['left'],
-                                                    self.robot.driveTrain.MP_SLOT0_SELECT,
-                                                    self.robot.driveTrain.MP_SLOT1_SELECT)
-        self.rightFollower = MotionProfileController(self.robot.driveTrain.rightTalon,
-                                                     self.path['right'],
-                                                     self.robot.driveTrain.MP_SLOT0_SELECT,
-                                                     self.robot.driveTrain.MP_SLOT1_SELECT)
-        self.leftFollower.start()
-        self.rightFollower.start()
+        self.pathFollower = DrivetrainMPController(self.robot.driveTrain.leftTalon,
+                                                   self.path['left'],
+                                                   self.robot.driveTrain.rightTalon,
+                                                   self.path['right'],
+                                                   self.robot.driveTrain.MP_SLOT0_SELECT,
+                                                   self.robot.driveTrain.MP_SLOT1_SELECT)
+
+        self.pathFollower.start()
 
     def execute(self):
         """
-        If the left and right path followers have finished following the path, mark this command as
-        complete.  Otherwise, call the control method to update and act upon the controllers state
-        machine.
+        If the path followers has finished following the path, mark this command as complete.
+        Otherwise, call the control method to update and act upon the controllers state machine.
         """
-        if self.leftFollower.isFinished() and self.rightFollower.isFinished():
+        if self.pathFollower.isFinished():
             self.finished = True
         else:
-            self.leftFollower.control()
-            self.rightFollower.control()
+            self.pathFollower.control()
+
+    def end(self):
+        '''
+        Exit the DrivetrainMotionProfileControllers
+        '''
+        self.robot.driveTrain.cleanUpDrivetrainMotionProfileControllers()
