@@ -48,6 +48,7 @@ def GeneratePath(path_name, file_name, waypoints):
                                    PF_MAX_ACCELERATION, PF_MAX_JERK)
 
     print(info)
+    
 
     # Modify the path for the differential drive
     modifier = pf.modifiers.TankModifier(trajectory).modify(ROBOT_WHEELBASE_FT)
@@ -55,6 +56,8 @@ def GeneratePath(path_name, file_name, waypoints):
     # Ge the left and right trajectories
     leftTrajectory = modifier.getLeftTrajectory()
     rightTrajectory = modifier.getRightTrajectory()
+
+    print("Trajectory length: %i" % (len(leftTrajectory)))
 
     # Grab the position, velocity + acceleration for feed-forward, heading, and duration
     path = {"left": [], "right": []}
