@@ -48,6 +48,14 @@ class DriveTrain(Subsystem):
         # Create the NavX gyro instance
         self.navX = AHRS.create_spi()
 
+        #reset talons
+        #===========================================================================================
+        # TalonReset.resetValues(self, self._frontLeftMotor)
+        # TalonReset.resetValues(self, self._rearLeftMotor)
+        # TalonReset.resetValues(self, self._frontRightMotor)
+        # TalonReset.resetValues(self, self._rearRightMotor)
+        #===========================================================================================
+
     def initControllerSetup(self):
         """
         This method will setup the default settings of the motor controllers.
