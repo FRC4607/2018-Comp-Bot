@@ -4,7 +4,7 @@ from commands.intake_motors_in import IntakeMotorsIn
 from commands.intake_motors_out import IntakeMotorsOut
 from commands.intake_pneumatics_open_close import IntakePneumaticsOpenClose
 from commands.boom_to_switch import BoomToSwitch
-from command.boom_to_intake import BoomToIntake
+from commands.boom_to_intake import BoomToIntake
 from constants import DRIVER_JOYSTICK, OPERATOR_JOYSTICK, INTAKE_OUT_SWITCH_FAST, \
     INTAKE_OUT_SWITCH_SLOW, INTAKE_OUT_SCALE, LOGGER_LEVEL
 import logging

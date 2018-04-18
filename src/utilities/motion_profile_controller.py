@@ -137,7 +137,7 @@ class MotionProfileController():
         elif self._state == 2:
             if not self._status.isUnderrun:
                 self._loopTimeout = self.MIN_NUM_POINTS
-               
+
             if self._status.activePointValid and self._status.isLast:
                 logger.info("Talon MPE is at the last trajectory point")
                 self._state = 3
@@ -243,6 +243,10 @@ class MotionProfileController():
                 self._talon.pushMotionProfileTrajectory(self._point)
 
     def _outputStatus(self):
-        print("isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
-              (self._status.isUnderrun, self._status.hasUnderrun, self._status.topBufferRem, self._status.topBufferCnt, self._status.btmBufferCnt, self._status.activePointValid, self._status.isLast))
+        logger.warning("isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, topBufferCnt: %i, "
+                       "btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
+                       (self._status.isUnderrun, self._status.hasUnderrun,
+                        self._status.topBufferRem, self._status.topBufferCnt,
+                        self._status.btmBufferCnt, self._status.activePointValid,
+                        self._status.isLast))
         # "profileSlotSelect0", "outputEnable", "timeDurMs", "profileSlotSelect1",

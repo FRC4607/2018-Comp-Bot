@@ -38,7 +38,7 @@ class DrivetrainMPController():
         # Reference used to collect the status of the named tuple data transfer object
         self._leftStatus = MotionProfileStatus
         self._rightStatus = MotionProfileStatus
-        
+
         # Reference used to collect the trajectory point of the named tuple data transfer object
         self._leftPoint = TrajectoryPoint
         self._rightPoint = TrajectoryPoint
@@ -117,7 +117,6 @@ class DrivetrainMPController():
                     logger.warning("Clearing Right Talon MPE underrun")
                     self._rightTalon.clearMotionProfileHasUnderrun(0)
 
-
                 # Make sure the top and bottom buffers are empty
                 elif self._leftStatus.btmBufferCnt != 0 or self._leftStatus.topBufferCnt != 0:
                     logger.warning("Clearing Left Talon MPE buffer(s)")
@@ -140,7 +139,7 @@ class DrivetrainMPController():
         # the bottom buffer, enable the Talon MPE.
         elif self._state == 1:
             if (self._leftStatus.btmBufferCnt > self.NUM_LOOPS_TIMEOUT and
-                self._rightStatus.btmBufferCnt > self.NUM_LOOPS_TIMEOUT):
+                    self._rightStatus.btmBufferCnt > self.NUM_LOOPS_TIMEOUT):
                 logger.info("Left and Right Talon MPE bottom buffers are ready,"
                             " enabling the Talon MPEs")
                 self._state = 2
@@ -155,15 +154,15 @@ class DrivetrainMPController():
         # ***** TODO ***** (may want to go to neutral instead)
         elif self._state == 2:
             if not self._leftStatus.isUnderrun and not self._rightStatus.isUnderrun:
-                print("Left Buffer: %i, Right Buffer: %i" %
-                      (self._leftStatus.topBufferCnt, self._rightStatus.topBufferCnt))
+                logger.debug("Left Buffer: %i, Right Buffer: %i" %
+                             (self._leftStatus.topBufferCnt, self._rightStatus.topBufferCnt))
                 self._loopTimeout = self.MIN_NUM_POINTS
             else:
-                print("Talon MPE UNDERRUN: left: %s, Right: %s" %
-                      (self._leftStatus.isUnderrun, self._rightStatus.isUnderrun))
+                logger.warning("Talon MPE UNDERRUN: left: %s, Right: %s" %
+                               (self._leftStatus.isUnderrun, self._rightStatus.isUnderrun))
 
             if (self._leftStatus.activePointValid and self._leftStatus.isLast and
-                self._rightStatus.activePointValid and self._rightStatus.isLast):
+                    self._rightStatus.activePointValid and self._rightStatus.isLast):
                 logger.info("Talon MPEs are at the last trajectory point")
                 self._state = 3
                 self._notifier.stop()
@@ -187,8 +186,6 @@ class DrivetrainMPController():
         still in the buffer, setting the control mode to motion profile (disabled), change the
         control frame period to the stream rate, and clearing any prior buffer underruns.
         """
-        self._leftTalon.changeMotionControlFramePeriod(self._streamRateMS)
-        self._rightTalon.changeMotionControlFramePeriod(self._streamRateMS)
         self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
                             SetValueMotionProfile.Disable)
         self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
@@ -198,7 +195,7 @@ class DrivetrainMPController():
             self._leftTalon.clearMotionProfileHasUnderrun(0)
         if self._rightStatus.hasUnderrun:
             logger.warning("Clearing Right Talon UNDERRUN condition during reset")
-            self._rightTalon.clearMotionProfileHasUnderrun(0) 
+            self._rightTalon.clearMotionProfileHasUnderrun(0)
         if self._leftStatus.btmBufferCnt != 0 or self._leftStatus.topBufferCnt != 0:
             logger.warning("Clearing Left Talon MPE buffer(s)")
             self._leftTalon.clearMotionProfileTrajectories()
@@ -277,10 +274,15 @@ class DrivetrainMPController():
             self._rightTalon.pushMotionProfileTrajectory(self._rightPoint)
 
     def _outputStatus(self):
-        print("Left Talon MP Status: isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
-              (self._leftStatus.isUnderrun, self._leftStatus.hasUnderrun, self._leftStatus.topBufferRem, self._leftStatus.topBufferCnt, self._leftStatus.btmBufferCnt, self._leftStatus.activePointValid, self._leftStatus.isLast))
-        print("Right Talon MP Status: isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
-              (self._rightStatus.isUnderrun, self._rightStatus.hasUnderrun, self._rightStatus.topBufferRem, self._rightStatus.topBufferCnt, self._rightStatus.btmBufferCnt, self._rightStatus.activePointValid, self._rightStatus.isLast))
-
-            # "profileSlotSelect0", "outputEnable", "timeDurMs", "profileSlotSelect1",
-
+        logger.warning("LEFT: isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, "
+                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
+                       (self._leftStatus.isUnderrun, self._leftStatus.hasUnderrun,
+                        self._leftStatus.topBufferRem, self._leftStatus.topBufferCnt,
+                        self._leftStatus.btmBufferCnt, self._leftStatus.activePointValid,
+                        self._leftStatus.isLast))
+        logger.warning("RIGHT: isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, "
+                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
+                       (self._rightStatus.isUnderrun, self._rightStatus.hasUnderrun,
+                        self._rightStatus.topBufferRem, self._rightStatus.topBufferCnt,
+                        self._rightStatus.btmBufferCnt, self._rightStatus.activePointValid,
+                        self._rightStatus.isLast))

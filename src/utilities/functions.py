@@ -48,7 +48,6 @@ def GeneratePath(path_name, file_name, waypoints):
                                    PF_MAX_ACCELERATION, PF_MAX_JERK)
 
     print(info)
-    
 
     # Modify the path for the differential drive
     modifier = pf.modifiers.TankModifier(trajectory).modify(ROBOT_WHEELBASE_FT)
@@ -66,13 +65,15 @@ def GeneratePath(path_name, file_name, waypoints):
                  "L_x, L_y, L_pos, L_vel, L_acc, L_heading, "
                  "R_x, R_y, R_pos, R_vel, R_acc, R_heading\n")
     for i in range(len(leftTrajectory)):
-        path["left"].append([leftTrajectory[i].position * 4096 / (ROBOT_WHEEL_DIAMETER_FT * math.pi),
+        path["left"].append([leftTrajectory[i].position * 4096 /
+                             (ROBOT_WHEEL_DIAMETER_FT * math.pi),
                              CalculateFeedForwardVoltage(True,
                                                          leftTrajectory[i].velocity,
                                                          leftTrajectory[i].acceleration),
                              pf.r2d(leftTrajectory[i].heading),
                              int(leftTrajectory[i].dt * 1000)])
-        path["right"].append([rightTrajectory[i].position * 4096 / (ROBOT_WHEEL_DIAMETER_FT * math.pi),
+        path["right"].append([rightTrajectory[i].position * 4096 /
+                              (ROBOT_WHEEL_DIAMETER_FT * math.pi),
                               CalculateFeedForwardVoltage(False,
                                                           rightTrajectory[i].velocity,
                                                           rightTrajectory[i].acceleration),

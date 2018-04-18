@@ -27,6 +27,7 @@ class ForwardPathFollower(Command):
 
         # Control variables
         self.finished = True
+        self._streamRate = int(self.path['left'][0][2] / 2)
 
     def isFinished(self):
         """
@@ -40,7 +41,7 @@ class ForwardPathFollower(Command):
         following the path.
         """
         self.finished = False
-        self.robot.driveTrain.initiaizeDrivetrainMotionProfileControllers()
+        self.robot.driveTrain.initiaizeDrivetrainMotionProfileControllers(self._streamRate)
         self.pathFollower = DrivetrainMPController(self.robot.driveTrain.leftTalon,
                                                    self.path['left'],
                                                    self.robot.driveTrain.rightTalon,
