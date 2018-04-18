@@ -40,16 +40,13 @@ class ForwardPathFollower(Command):
         following the path.
         """
         self.finished = False
-
         self.robot.driveTrain.initiaizeDrivetrainMotionProfileControllers()
-
         self.pathFollower = DrivetrainMPController(self.robot.driveTrain.leftTalon,
                                                    self.path['left'],
                                                    self.robot.driveTrain.rightTalon,
                                                    self.path['right'],
                                                    self.robot.driveTrain.MP_SLOT0_SELECT,
                                                    self.robot.driveTrain.MP_SLOT1_SELECT)
-
         self.pathFollower.start()
 
     def execute(self):
