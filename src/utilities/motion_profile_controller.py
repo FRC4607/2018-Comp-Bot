@@ -19,7 +19,7 @@ class MotionProfileController():
     """
 
     NOTIFIER_DEBUG_CNT = 100
-    MIN_NUM_POINTS = 5
+    MIN_NUM_POINTS = 50
     NUM_LOOPS_TIMEOUT = 10
 
     def __init__(self, talon, points, reverse, profile_slot_select0, profile_slot_select1):
@@ -83,7 +83,8 @@ class MotionProfileController():
             pass
         else:
             if self._loopTimeout == 0:
-                logger.warning("No progress being made")
+                logger.warning("No progress being made - State = %i" % (self._state))
+                self._outputStatus()
             else:
                 self._loopTimeout -= 1
 
@@ -136,7 +137,7 @@ class MotionProfileController():
         elif self._state == 2:
             if not self._status.isUnderrun:
                 self._loopTimeout = self.MIN_NUM_POINTS
-
+               
             if self._status.activePointValid and self._status.isLast:
                 logger.info("Talon MPE is at the last trajectory point")
                 self._state = 3
@@ -240,3 +241,8 @@ class MotionProfileController():
                 if i+1 == len(self._points):
                     self._point.isLastPoint = True
                 self._talon.pushMotionProfileTrajectory(self._point)
+
+    def _outputStatus(self):
+        print("isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
+              (self._status.isUnderrun, self._status.hasUnderrun, self._status.topBufferRem, self._status.topBufferCnt, self._status.btmBufferCnt, self._status.activePointValid, self._status.isLast))
+        # "profileSlotSelect0", "outputEnable", "timeDurMs", "profileSlotSelect1",
