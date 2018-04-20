@@ -111,7 +111,7 @@ class DriveTrain(Subsystem):
         self.frontRight.setInverted(False)
 
         # Change the control frame period back to the default
-        framePeriod = TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS / 1000
+        framePeriod = TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS
         self.leftTalon.changeMotionControlFramePeriod(framePeriod)
         self.rightTalon.changeMotionControlFramePeriod(framePeriod)
 

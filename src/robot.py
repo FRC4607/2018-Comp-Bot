@@ -74,6 +74,25 @@ class Pitchfork(TimedRobot):
         # Boom state start at the scale
         self.boomState = BOOM_STATE.Scale
 
+        # Output debug data to the smartdashboard
+        if LOGGER_LEVEL == logging.DEBUG:
+            self.smartDashboard.putNumber("RightEncPos", 0.0)
+            self.smartDashboard.putNumber("RightActPos", 0.0)
+            self.smartDashboard.putNumber("RightEncVel", 0.0)
+            self.smartDashboard.putNumber("RightActVel", 0.0)
+            self.smartDashboard.putNumber("RightPrimaryTarget", 0.0)
+            self.smartDashboard.putNumber("RightPrimaryError", 0.0)
+            self.smartDashboard.putNumber("TimeStamp", 0.0)
+            self.smartDashboard.putNumber("LeftEncPos", 0.0)
+            self.smartDashboard.putNumber("LeftActPos", 0.0)
+            self.smartDashboard.putNumber("LeftEncVel", 0.0)
+            self.smartDashboard.putNumber("LeftActVel", 0.0)
+            self.smartDashboard.putNumber("LeftPrimaryTarget", 0.0)
+            self.smartDashboard.putNumber("LeftPrimaryError", 0.0)
+            self.smartDashboard.putNumber("RightTopBufferCount", 0.0)
+            self.smartDashboard.putNumber("LeftTopBufferCount", 0.0)
+            self.smartDashboard.putNumber("LeftBottomBufferCount", 0.0)
+            self.smartDashboard.putNumber("RightBottomBufferCount", 0.0)
     def disabledInit(self):
         """
         Initialization code for disabled mode should go here.  This method will be called each
