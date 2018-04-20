@@ -24,7 +24,6 @@ class DrivetrainMPController():
     SYNC_CONSTANT = 2
     SYNC_SIDE_LEFT = True
 
-
     def __init__(self, left_talon, left_points, right_talon, right_points,
                  profile_slot_select0, profile_slot_select1):
 
@@ -143,8 +142,6 @@ class DrivetrainMPController():
         elif self._state == 1:
             if (self._leftStatus.btmBufferCnt > self.MIN_NUM_POINTS and
                     self._rightStatus.btmBufferCnt > self.MIN_NUM_POINTS):
-                logger.info("Left and Right Talon MPE bottom buffers are ready,"
-                            " enabling the Talon MPEs")
                 self._state = 2
                 self._loopTimeout = self.MIN_NUM_POINTS
                 self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
@@ -289,9 +286,9 @@ class DrivetrainMPController():
                 self._leftPoint.profileSlotSelect1 = self._profileSlotSelect1
                 self._leftPoint.timeDur = self._getTrajectoryDuration(self._leftPoints[0][3])
                 self._leftPoint.zeroPos = False
-                self._leftPoint.isLastPoint = False                
+                self._leftPoint.isLastPoint = False
                 self._leftTalon.pushMotionProfileTrajectory(self._leftPoint)
-        
+
         for i in range(len(self._leftPoints)):
             self._leftPoint.position = self._leftPoints[i][0]
             self._leftPoint.velocity = self._leftPoints[i][1]

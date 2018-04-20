@@ -136,8 +136,8 @@ class DriveTrain(Subsystem):
                                                   0, 10)
 
         # Select the remote feedback sensor for PID1
-        self.rightTalon.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0, 1, 10)
-        self.leftTalon.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0, 1, 10)
+        self.rightTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.RemoteSensor0, 1, 10)
+        self.leftTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.RemoteSensor0, 1, 10)
 
         # Using the config feature, scale units to 3600 per rotation.  This is nice as it keeps
         # 0.1 deg resolution, and is fairly intuitive.

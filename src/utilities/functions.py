@@ -164,13 +164,25 @@ def GenerateMotionProfile(motion_profile_name, file_name, trajectory,
         pickle.dump(path, fp)
 
     # Plot the data for review
-    x = list(i * (trajectory[i].dt) for i, _ in enumerate(trajectory))
     plt.figure()
+    plt.title("Trajectory(Native Units)")
+    plt.plot([segment.y * position_units for segment in trajectory],
+             [segment.x * position_units for segment in trajectory],
+             marker='.', color='b')
+    x = list(i * (trajectory[i].dt) for i, _ in enumerate(trajectory))
+
+    # Plot the velocity and acceleration and look for any discontinuities
+    plt.figure()
+    plt.subplot(2, 1, 1)
     plt.title("Velocity")
-    plt.plot(x, [segment.velocity for segment in trajectory],
-             marker='.', color='r', label='velocity')
-    plt.plot(x, [segment.acceleration for segment in trajectory],
-             marker='.', color='b', label='acceration')
+    plt.plot(x, [segment.velocity for segment in trajectory], marker='.', color='r',
+             label='velocity')
+    plt.grid()
+    plt.subplot(2, 1, 2)
+    plt.title("Acceleration")
+    plt.plot(x, [segment.acceleration for segment in trajectory], marker='.', color='b',
+             label='acceration')
+    plt.grid()
     plt.tight_layout()
     plt.show()
 
