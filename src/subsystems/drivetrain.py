@@ -2,11 +2,13 @@ from wpilib import SpeedControllerGroup
 from wpilib.command import Subsystem
 from wpilib.drive.differentialdrive import DifferentialDrive
 from ctre.wpi_talonsrx import WPI_TalonSRX
-from robotpy_ext.common_drivers.navx import AHRS
+from ctre.pigeonimu import PigeonIMU
+from ctre._impl.autogen.ctre_sim_enums import RemoteSensorSource
 from commands.drive_joystick import DriveJoystick
-from constants import DRIVETRAIN_FRONT_LEFT_MOTOR, DRIVETRAIN_REAR_LEFT_MOTOR, \
+from constants import DRIVETRAIN_FRONT_LEFT_MOTOR, DRIVETRAIN_REAR_LEFT_MOTOR, DRIVETRAIN_PIGEON, \
     DRIVETRAIN_FRONT_RIGHT_MOTOR, DRIVETRAIN_REAR_RIGHT_MOTOR, LOGGER_LEVEL, \
     TALON_DEFAULT_QUADRATURE_STATUS_FRAME_PERIOD_MS, TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS
+
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(LOGGER_LEVEL)
@@ -44,6 +46,10 @@ class DriveTrain(Subsystem):
 
         # Setup the default motor controller setup
         self.initControllerSetup()
+
+        # Map the pigeon.  This will be connected to an unused Talon.
+        self.talonPigeon = WPI_TalonSRX(DRIVETRAIN_PIGEON)
+        self.pigeonIMU = PigeonIMU(self.talonPigeon)
 
     def initControllerSetup(self):
         """
@@ -94,13 +100,13 @@ class DriveTrain(Subsystem):
         self.rightTalon.config_kD(0, 0.0, 10)
         self.rightTalon.config_kF(0, 1023 / 12, 10)  # 10-bit ADC / 12 V
 
-        # Initilaize the quadrature encoders
-        self.initQuadratureEncoder()
-
         # Change the control frame period
         self.leftTalon.changeMotionControlFramePeriod(stream_rate)
         self.rightTalon.changeMotionControlFramePeriod(stream_rate)
 
+        # Initilaize the quadrature encoders and pigeon IMU
+        self.initQuadratureEncoder()
+        self.initPigeonIMU()
 
     def cleanUpDrivetrainMotionProfileControllers(self):
         '''
@@ -115,6 +121,32 @@ class DriveTrain(Subsystem):
         self.leftTalon.changeMotionControlFramePeriod(framePeriod)
         self.rightTalon.changeMotionControlFramePeriod(framePeriod)
 
+    def initPigeonIMU(self):
+        # false means talon's local output is PID0 + PID1, and other side Talon is PID0 - PID1
+        # true means talon's local output is PID0 - PID1, and other side Talon is PID0 + PID1
+        self.rightTalon.configAuxPIDPolarity(False, 10)
+        self.leftTalon.configAuxPIDPolarity(True, 10)
+
+        # select a gadgeteer pigeon for remote 0
+        self.rightTalon.configRemoteFeedbackFilter(self.talonPigeon.getDeviceID(),
+                                                   RemoteSensorSource.GadgeteerPigeon_Yaw,
+                                                   0, 10)
+        self.leftTalon.configRemoteFeedbackFilter(self.talonPigeon.getDeviceID(),
+                                                  RemoteSensorSource.GadgeteerPigeon_Yaw,
+                                                  0, 10)
+
+        # Select the remote feedback sensor for PID1
+        self.rightTalon.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0, 1, 10)
+        self.leftTalon.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0, 1, 10)
+
+        # Using the config feature, scale units to 3600 per rotation.  This is nice as it keeps
+        # 0.1 deg resolution, and is fairly intuitive.
+        self.rightTalon.configSelectedFeedbackCoefficient(3600 / 8192, 1, 10)
+        self.leftTalon.configSelectedFeedbackCoefficient(3600 / 8192, 1, 10)
+
+        # Zero the sensor
+        self.pigeonIMU.setYaw(0, 10)
+        self.pigeonIMU.setAccumZAngle(0, 10)
 
     def initQuadratureEncoder(self):
         """
