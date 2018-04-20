@@ -105,11 +105,11 @@ class DrivetrainMPController():
                 # Make sure the Talon MPE is disabled before servicing the start signal
                 if self._leftStatus.outputEnable != SetValueMotionProfile.Disable:
                     logger.warning("Disabling the Left Talon MPE")
-                    self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
+                    self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
                                         SetValueMotionProfile.Disable)
                 elif self._rightStatus.outputEnable != SetValueMotionProfile.Disable:
                     logger.warning("Disabling the Right Talon MPE")
-                    self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
+                    self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
                                          SetValueMotionProfile.Disable)
 
                 # Log any prior underrun conitions
@@ -147,9 +147,9 @@ class DrivetrainMPController():
                             " enabling the Talon MPEs")
                 self._state = 2
                 self._loopTimeout = self.MIN_NUM_POINTS
-                self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
+                self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
                                     SetValueMotionProfile.Enable)
-                self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
+                self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
                                      SetValueMotionProfile.Enable)
         # Check status of the MP and if there isn't an underrun condition, reset the loop timeout.
         # Once the last point has been processed, stop the notifier and set the Talon MPE to hold
@@ -170,9 +170,9 @@ class DrivetrainMPController():
                 self._state = 3
                 self._notifier.stop()
                 logger.info("Called to stop Motion Profile Controller notifier")
-                self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
+                self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
                                     SetValueMotionProfile.Disable)
-                self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
+                self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
                                      SetValueMotionProfile.Disable)
 
             # Output debug data to the smartdashboard
@@ -222,9 +222,9 @@ class DrivetrainMPController():
         still in the buffer, setting the control mode to motion profile (disabled), change the
         control frame period to the stream rate, and clearing any prior buffer underruns.
         """
-        self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
+        self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
                             SetValueMotionProfile.Disable)
-        self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
+        self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
                              SetValueMotionProfile.Disable)
         if self._leftStatus.hasUnderrun:
             logger.warning("Clearing Left Talon UNDERRUN condition during reset")
