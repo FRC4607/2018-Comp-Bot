@@ -58,7 +58,7 @@ class ForwardPathFollower(Command):
         if self.pathFollower.isFinished():
             self.finished = True
         else:
-            self.pathFollower.control()
+            self.pathFollower.control(self.robot.timer.get(), self.robot.smartDashboard)
 
     def end(self):
         '''

@@ -19,8 +19,11 @@ class DrivetrainMPController():
     """
 
     NOTIFIER_DEBUG_CNT = 100
-    MIN_NUM_POINTS = 350
+    MIN_NUM_POINTS = 50
     NUM_LOOPS_TIMEOUT = 10
+    SYNC_CONSTANT = 2
+    SYNC_SIDE_LEFT = True
+
 
     def __init__(self, left_talon, left_points, right_talon, right_points,
                  profile_slot_select0, profile_slot_select1):
@@ -75,7 +78,7 @@ class DrivetrainMPController():
         """
         return self._finished
 
-    def control(self):
+    def control(self, time_stamp, smart_dashboard):
         """
         This method is called by the command every 20ms in autonomous or teleop.
         """
@@ -138,8 +141,8 @@ class DrivetrainMPController():
         # The Talon MPE has started filling the buffer.  Once enough points have been loaded into
         # the bottom buffer, enable the Talon MPE.
         elif self._state == 1:
-            if (self._leftStatus.btmBufferCnt > self.NUM_LOOPS_TIMEOUT and
-                    self._rightStatus.btmBufferCnt > self.NUM_LOOPS_TIMEOUT):
+            if (self._leftStatus.btmBufferCnt > self.MIN_NUM_POINTS and
+                    self._rightStatus.btmBufferCnt > self.MIN_NUM_POINTS):
                 logger.info("Left and Right Talon MPE bottom buffers are ready,"
                             " enabling the Talon MPEs")
                 self._state = 2
@@ -171,6 +174,39 @@ class DrivetrainMPController():
                                     SetValueMotionProfile.Disable)
                 self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfile,
                                      SetValueMotionProfile.Disable)
+
+            # Output debug data to the smartdashboard
+            if LOGGER_LEVEL == logging.DEBUG:
+                smart_dashboard.putNumber("RightEncPos",
+                                          self._rightTalon.getSensorCollection().getQuadraturePosition())
+                smart_dashboard.putNumber("RightActPos",
+                                          self._rightTalon.getActiveTrajectoryPosition())
+                smart_dashboard.putNumber("RightEncVel",
+                                          self._rightTalon.getQuadratureVelocity())
+                smart_dashboard.putNumber("RightActVel",
+                                          self._rightTalon.getActiveTrajectoryPosition())
+                smart_dashboard.putNumber("RightPrimaryTarget",
+                                          self._rightTalon.getClosedLoopTarget(0))
+                smart_dashboard.putNumber("RightPrimaryError",
+                                          self._rightTalon.getClosedLoopError(0))
+                smart_dashboard.putNumber("LeftEncPos",
+                                          self._leftTalon.getSensorCollection().getQuadraturePosition())
+                smart_dashboard.putNumber("LeftActPos",
+                                          self._leftTalon.getActiveTrajectoryPosition())
+                smart_dashboard.putNumber("LeftEncVel",
+                                          self._leftTalon.getQuadratureVelocity())
+                smart_dashboard.putNumber("LeftActVel",
+                                          self._leftTalon.getActiveTrajectoryPosition())
+                smart_dashboard.putNumber("LeftPrimaryTarget",
+                                          self._leftTalon.getClosedLoopTarget(0))
+                smart_dashboard.putNumber("LeftPrimaryError",
+                                          self._leftTalon.getClosedLoopError(0))
+                smart_dashboard.putNumber("RightTopBufferCount", self._rightStatus.topBufferCnt)
+                smart_dashboard.putNumber("LeftTopBufferCount", self._leftStatus.topBufferCnt)
+                smart_dashboard.putNumber("LeftBottomBufferCount", self._leftStatus.btmBufferCnt)
+                smart_dashboard.putNumber("RightBottomBufferCount", self._rightStatus.btmBufferCnt)
+                smart_dashboard.putNumber("TimeStamp", time_stamp)
+
         elif self._state == 3:
             self._state = 0
             self._loopTimeout -= 1
@@ -244,6 +280,18 @@ class DrivetrainMPController():
         """
         This method will start filling the top buffer of the Talon MPE.  This will execute quickly.
         """
+        for i in range(self.SYNC_CONSTANT):
+            if self.SYNC_SIDE_LEFT:
+                self._leftPoint.position = 0
+                self._leftPoint.velocity = 0
+                self._leftPoint.auxiliaryPos = 0
+                self._leftPoint.profileSlotSelect0 = self._profileSlotSelect0
+                self._leftPoint.profileSlotSelect1 = self._profileSlotSelect1
+                self._leftPoint.timeDur = self._getTrajectoryDuration(self._leftPoints[0][3])
+                self._leftPoint.zeroPos = False
+                self._leftPoint.isLastPoint = False                
+                self._leftTalon.pushMotionProfileTrajectory(self._leftPoint)
+        
         for i in range(len(self._leftPoints)):
             self._leftPoint.position = self._leftPoints[i][0]
             self._leftPoint.velocity = self._leftPoints[i][1]
