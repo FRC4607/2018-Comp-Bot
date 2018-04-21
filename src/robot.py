@@ -93,6 +93,7 @@ class Pitchfork(TimedRobot):
             self.smartDashboard.putNumber("LeftTopBufferCount", 0.0)
             self.smartDashboard.putNumber("LeftBottomBufferCount", 0.0)
             self.smartDashboard.putNumber("RightBottomBufferCount", 0.0)
+
     def disabledInit(self):
         """
         Initialization code for disabled mode should go here.  This method will be called each

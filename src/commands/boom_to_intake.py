@@ -22,7 +22,10 @@ class BoomToIntake(Command):
         # are symetric, so it should be good for using here.
         with open(os.path.join(os.path.dirname(__file__),
                                'boom_intake_to_switch.pickle'), "rb") as fp:
-            self.path = pickle.load(fp)
+            self.intakeToSwitchPath = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__),
+                               'boom_intake_to_scale.pickle'), "rb") as fp:
+            self.intakeToScalePath = pickle.load(fp)
 
     def initialize(self):
         self.finished = False
@@ -33,15 +36,16 @@ class BoomToIntake(Command):
             # Double-check the pot to ensure the boom is at the switch
             startPotError = abs(self.robot.boom.getPotPositionInDegrees() -
                                 self.robot.boom.POT_SWITCH_POSITION_DEG)
-            if startPotError < 90.0:
+            if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
                 # References to the talon PIDF slot index and the encoder tics per revolution
                 slotIndex = self.robot.boom.SWITCH_TO_INTAKE_SLOT_INDEX
 
                 # Create the motion profile controller object
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
-                                                                       self.path,
+                                                                       self.intakeToSwitchPath,
                                                                        True,
+                                                                       self.robot.boom.getPotPosition(),
                                                                        slotIndex,
                                                                        0)
                 # The start method will signal the motion profile controller to start
@@ -58,8 +62,21 @@ class BoomToIntake(Command):
             # Double-check the pot to ensure the boom is at the switch
             startPotError = abs(self.robot.boom.getPotPositionInDegrees() -
                                 self.robot.boom.POT_SCALE_POSITION_DEG)
-            if startPotError < 90.0:
-                pass
+            if startPotError < self.robot.boom.POT_ERROR_LIMIT:
+
+                # References to the talon PIDF slot index and the encoder tics per revolution
+                slotIndex = self.robot.boom.SWITCH_TO_INTAKE_SLOT_INDEX
+
+                # Create the motion profile controller object
+                self.motionProfileController = MotionProfileController(self.robot.boom.talon,
+                                                                       self.intakeToScalePath,
+                                                                       True,
+                                                                       self.robot.boom.getPotPosition(),
+                                                                       slotIndex,
+                                                                       0)
+                # The start method will signal the motion profile controller to start
+                self.motionProfileController.start()
+
             else:
                 logger.warning("Boom to Intake Command not started - StartPotError: %3.1f" %
                                (startPotError))

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(LOGGER_LEVEL)
 
 
-class BoomToSwitch(Command):
+class BoomToScale(Command):
     """
     This command will move the boom to the intake position.
     """
@@ -20,11 +20,11 @@ class BoomToSwitch(Command):
 
         # Read up the pickled path file
         with open(os.path.join(os.path.dirname(__file__),
-                               'boom_intake_to_switch.pickle'), "rb") as fp:
-            self.intakeToSwitchPath = pickle.load(fp)
-        with open(os.path.join(os.path.dirname(__file__),
                                'boom_switch_to_scale.pickle'), "rb") as fp:
             self.switchToScalePath = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__),
+                               'boom_intake_to_scale.pickle'), "rb") as fp:
+            self.intakeToScalePath = pickle.load(fp)
 
     def initialize(self):
         self.finished = False
@@ -42,25 +42,31 @@ class BoomToSwitch(Command):
 
                 # Create the motion profile controller object
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
-                                                                       self.intakeToSwitchPath,
+                                                                       self.intakeToScalePath,
                                                                        False,
                                                                        self.robot.boom.getPotPosition(),
                                                                        slotIndex,
                                                                        0)
+
                 # The start method will signal the motion profile controller to start
                 self.motionProfileController.start()
 
             else:
-                logger.warning("Boom to Switch Command not started - StartPotError: %3.1f" %
+                logger.warning("Boom to Scale Command not started - StartPotError: %3.1f" %
+                               (startPotError))
+                self.finished = True
+
+            else:
+                logger.warning("Boom to Scale Command not started - StartPotError: %3.1f" %
                                (startPotError))
                 self.finished = True
 
         # The boom is currently at the scale
-        elif self.robot.boomState == BOOM_STATE.Scale:
+        elif self.robot.boomState == BOOM_STATE.Switch:
 
             # Double-check the pot to ensure the boom is at the switch
             startPotError = abs(self.robot.boom.getPotPositionInDegrees() -
-                                self.robot.boom.POT_SCALE_POSITION_DEG)
+                                self.robot.boom.POT_SWITCH_POSITION_DEG)
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
                 # References to the talon PIDF slot index and the encoder tics per revolution
@@ -69,15 +75,16 @@ class BoomToSwitch(Command):
                 # Create the motion profile controller object
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.switchToScalePath,
-                                                                       True,
+                                                                       False,
                                                                        self.robot.boom.getPotPosition(),
                                                                        slotIndex,
                                                                        0)
+
                 # The start method will signal the motion profile controller to start
                 self.motionProfileController.start()
 
             else:
-                logger.warning("Boom to Switch Command not started - StartPotError: %3.1f" %
+                logger.warning("Boom to Scale Command not started - StartPotError: %3.1f" %
                                (startPotError))
                 self.finished = True
 
@@ -115,5 +122,5 @@ class BoomToSwitch(Command):
         return self.finished
 
     def end(self):
-        self.robot.boomState = BOOM_STATE.Switch
+        self.robot.boomState = BOOM_STATE.Scale
         self.robot.boom.initOpenLoop()
