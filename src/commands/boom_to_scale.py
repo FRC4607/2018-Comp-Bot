@@ -37,24 +37,16 @@ class BoomToScale(Command):
                                 self.robot.boom.POT_INTAKE_POSITION_DEG)
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
-                # References to the talon PIDF slot index and the encoder tics per revolution
-                slotIndex = self.robot.boom.INTAKE_TO_SWITCH_SLOT_INDEX
-
                 # Create the motion profile controller object
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.intakeToScalePath,
                                                                        False,
                                                                        self.robot.boom.getPotPosition(),
-                                                                       slotIndex,
+                                                                       1,
                                                                        0)
 
                 # The start method will signal the motion profile controller to start
                 self.motionProfileController.start()
-
-            else:
-                logger.warning("Boom to Scale Command not started - StartPotError: %3.1f" %
-                               (startPotError))
-                self.finished = True
 
             else:
                 logger.warning("Boom to Scale Command not started - StartPotError: %3.1f" %
@@ -69,15 +61,12 @@ class BoomToScale(Command):
                                 self.robot.boom.POT_SWITCH_POSITION_DEG)
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
-                # References to the talon PIDF slot index and the encoder tics per revolution
-                slotIndex = self.robot.boom.INTAKE_TO_SWITCH_SLOT_INDEX
-
                 # Create the motion profile controller object
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.switchToScalePath,
                                                                        False,
                                                                        self.robot.boom.getPotPosition(),
-                                                                       slotIndex,
+                                                                       0,
                                                                        0)
 
                 # The start method will signal the motion profile controller to start

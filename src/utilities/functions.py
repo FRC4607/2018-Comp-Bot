@@ -35,7 +35,7 @@ def CalculateFeedForwardVoltage(leftSide, velocity, acceleration):
     return kV * velocity + kA * acceleration + VIntercept
 
 
-def GeneratePath(path_name, file_name, waypoints):
+def GeneratePath(path_name, file_name, waypoints, settings):
     """
     This function will take a set of pathfinder waypoints and create the trajectories to follow
     a path going through the waypoints.  This path is specific for the drivetrain controllers,
@@ -43,11 +43,12 @@ def GeneratePath(path_name, file_name, waypoints):
     forward in units of Volts.
     """
     # Generate the path
-    info, trajectory = pf.generate(waypoints, pf.FIT_HERMITE_QUINTIC, 1000000,
-                                   PF_SAMPLE_PERIOD_MS / 1000, PF_MAX_VELOCITY,
-                                   PF_MAX_ACCELERATION, PF_MAX_JERK)
+    info, trajectory = pf.generate(waypoints, settings.order, settings.samples, settings.period,
+                                   settings.maxVelocity, settings.maxAcceleration,
+                                   settings.maxJerk)
 
     print(info)
+    print("Trajectory length: %i" % (len(trajectory)))
 
     # Modify the path for the differential drive
     modifier = pf.modifiers.TankModifier(trajectory).modify(ROBOT_WHEELBASE_FT)
@@ -56,7 +57,6 @@ def GeneratePath(path_name, file_name, waypoints):
     leftTrajectory = modifier.getLeftTrajectory()
     rightTrajectory = modifier.getRightTrajectory()
 
-    print("Trajectory length: %i" % (len(leftTrajectory)))
 
     # Grab the position, velocity + acceleration for feed-forward, heading, and duration
     path = {"left": [], "right": []}
@@ -101,7 +101,7 @@ def GeneratePath(path_name, file_name, waypoints):
         pickle.dump(path, fp)
 
     # Plot the data for review
-    x = list(i * (PF_SAMPLE_PERIOD_MS / 1000) for i, _ in enumerate(leftTrajectory))
+    x = list(i * (settings.period) for i, _ in enumerate(leftTrajectory))
 
     plt.figure()
     # plt.plot(aspect=0.5)
@@ -255,3 +255,23 @@ def drawField(plt):
         plt.plot([Y_WALL_TO_SWITCH_NEAR + startOffset, Y_WALL_TO_SWITCH_NEAR + startOffset, Y_WALL_TO_SWITCH_NEAR + startOffset + 1.33, Y_WALL_TO_SWITCH_NEAR + startOffset + 1.33, Y_WALL_TO_SWITCH_NEAR + startOffset],
                  [X_WALL_TO_SWITCH_FAR,                X_WALL_TO_SWITCH_FAR + 1.33,         X_WALL_TO_SWITCH_FAR + 1.33,                X_WALL_TO_SWITCH_FAR,                       X_WALL_TO_SWITCH_FAR],
                  linewidth=2, color='yellow')
+
+    # Draw the cube pile
+    plt.plot([13.5 - 1.33 / 2,        13.5 + 1.33 / 2,      13.5 + 1.33 / 2,             13.5 - 1.33 / 2,             13.5 - 1.33 / 2],
+             [X_WALL_TO_SWITCH_NEAR,  X_WALL_TO_SWITCH_NEAR, X_WALL_TO_SWITCH_NEAR - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33, X_WALL_TO_SWITCH_NEAR],
+             linewidth=2, color='yellow')
+    plt.plot([13.5 - 1.33 - 1.33 / 2,        13.5 - 1.33 + 1.33 / 2,      13.5 - 1.33 + 1.33 / 2,             13.5 - 1.33 - 1.33 / 2,             13.5 - 1.33 - 1.33 / 2],
+             [X_WALL_TO_SWITCH_NEAR,  X_WALL_TO_SWITCH_NEAR, X_WALL_TO_SWITCH_NEAR - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33, X_WALL_TO_SWITCH_NEAR],
+             linewidth=2, color='yellow')
+    plt.plot([13.5 + 1.33 - 1.33 / 2,        13.5 + 1.33 + 1.33 / 2,      13.5 + 1.33 + 1.33 / 2,             13.5 + 1.33 - 1.33 / 2,             13.5 + 1.33 - 1.33 / 2],
+             [X_WALL_TO_SWITCH_NEAR,  X_WALL_TO_SWITCH_NEAR, X_WALL_TO_SWITCH_NEAR - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33, X_WALL_TO_SWITCH_NEAR],
+             linewidth=2, color='yellow')
+    plt.plot([13.5 - 1.33,            13.5,                  13.5,                         13.5 - 1.33,                  13.5 - 1.33],
+             [X_WALL_TO_SWITCH_NEAR - 1.33,  X_WALL_TO_SWITCH_NEAR - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33 - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33 - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33],
+             linewidth=2, color='yellow')
+    plt.plot([13.5,                   13.5 + 1.33,           13.5 + 1.33,                  13.5,                         13.5],
+             [X_WALL_TO_SWITCH_NEAR - 1.33,  X_WALL_TO_SWITCH_NEAR - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33 - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33 - 1.33, X_WALL_TO_SWITCH_NEAR - 1.33],
+             linewidth=2, color='yellow')
+    plt.plot([13.5 - 1.33 / 2,        13.5 + 1.33 / 2,      13.5 + 1.33 / 2,             13.5 - 1.33 / 2,             13.5 - 1.33 / 2],
+             [X_WALL_TO_SWITCH_NEAR - 2.66,  X_WALL_TO_SWITCH_NEAR - 2.66, X_WALL_TO_SWITCH_NEAR - 2.66 - 1.33, X_WALL_TO_SWITCH_NEAR - 2.66 - 1.33, X_WALL_TO_SWITCH_NEAR - 2.66],
+             linewidth=2, color='yellow')

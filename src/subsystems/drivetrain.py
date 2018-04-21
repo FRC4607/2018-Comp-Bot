@@ -86,7 +86,7 @@ class DriveTrain(Subsystem):
         self.rightTalon.configVoltageCompSaturation(12.0, 10)
         self.rightTalon.enableVoltageCompensation(True)
 
-        # PIDF slot index 0 is for autonomous
+        # PIDF slot index 0 is for autonomous wheel postion
         # There are 4096 encoder units per rev.  1 rev of the wheel is pi * diameter.  That
         # evaluates to 2607.6 encoder units per foot.  For the feed-forward system, we expect very
         # tight position control, so use a P-gain which drives full throttle at 8" of error.  This
@@ -95,10 +95,28 @@ class DriveTrain(Subsystem):
         self.leftTalon.config_kI(0, 0.0, 10)
         self.leftTalon.config_kD(0, 0.0, 10)
         self.leftTalon.config_kF(0, 1023 / 12, 10)   # 10-bit ADC / 12 V
+        self.leftTalon.config_IntegralZone(0, 100, 10);
+        self.leftTalon.configClosedLoopPeakOutput(0, 1.0, 10)
         self.rightTalon.config_kP(0, 0.6, 10)
         self.rightTalon.config_kI(0, 0.0, 10)
         self.rightTalon.config_kD(0, 0.0, 10)
         self.rightTalon.config_kF(0, 1023 / 12, 10)  # 10-bit ADC / 12 V
+        self.rightTalon.config_IntegralZone(0, 100, 10);
+        self.rightTalon.configClosedLoopPeakOutput(0, 1.0, 10)
+
+        # PIDF slot index 1 is for autonomous heading
+        self.leftTalon.config_kP(1, 2.0, 10)
+        self.leftTalon.config_kI(1, 0, 10)
+        self.leftTalon.config_kD(1, 0, 10)
+        self.leftTalon.config_kF(1, 0, 10)
+        self.leftTalon.config_IntegralZone(1, 100, 10);
+        self.leftTalon.configClosedLoopPeakOutput(1, 1.0, 10)
+        self.rightTalon.config_kP(1, 2.0, 10)
+        self.rightTalon.config_kI(1, 0, 10)
+        self.rightTalon.config_kD(1, 0, 10)
+        self.rightTalon.config_kF(1, 0, 10)
+        self.rightTalon.config_IntegralZone(1, 100, 10);
+        self.rightTalon.configClosedLoopPeakOutput(1, 1.0, 10)
 
         # Change the control frame period
         self.leftTalon.changeMotionControlFramePeriod(stream_rate)
