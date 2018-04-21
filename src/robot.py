@@ -9,6 +9,8 @@ from subsystems.boom import Boom
 from oi import OI
 from autonomous.autonomous_chooser import *
 from autonomous.auton_forward import AutonForward
+from autonomous.auton_middle_start_left_switch import AutonMiddleStartLeftSwitch
+from autonomous.auton_left_start_left_scale import AutonMiddleStartLeftScale
 from constants import BOOM_STATE, LOGGER_LEVEL
 import logging
 logger = logging.getLogger(__name__)
@@ -62,8 +64,6 @@ class Pitchfork(TimedRobot):
         self.crossFieldChooser.addObject("Cross Field Disable", self.crossFieldDisable)
         self.crossFieldChooser.addDefault("Cross Field Disable", self.crossFieldDisable)
         self.smartDashboard.putData("Cross Field Enable", self.crossFieldChooser)
-
-        self.autonForward = AutonForward(self)
 
         # Create a timer for data logging
         self.timer = Timer()
@@ -139,8 +139,15 @@ class Pitchfork(TimedRobot):
         logger.info("Scoring Element %s" % (self.scoringElement))
 
         self.autonForward = AutonForward(self)
-        self.autonForward.start()
+        self.autonMiddleStartLeftSwitch = AutonMiddleStartLeftSwitch(self)
+        self.autonMiddleStartLeftScale = AutonMiddleStartLeftScale(self)
 
+        if self.startingPosition == "Left":
+            self.autonMiddleStartLeftScale.start()
+        elif self.startingPosition == "Middle":
+            self.autonMiddleStartLeftSwitch.start()
+        else:
+            self.autonForward.start()
 
 #==================================================================================================
 #         # Starting on the left side

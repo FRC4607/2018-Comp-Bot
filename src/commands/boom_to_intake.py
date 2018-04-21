@@ -38,15 +38,12 @@ class BoomToIntake(Command):
                                 self.robot.boom.POT_SWITCH_POSITION_DEG)
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
-                # References to the talon PIDF slot index and the encoder tics per revolution
-                slotIndex = self.robot.boom.SWITCH_TO_INTAKE_SLOT_INDEX
-
                 # Create the motion profile controller object
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.intakeToSwitchPath,
                                                                        True,
                                                                        self.robot.boom.getPotPosition(),
-                                                                       slotIndex,
+                                                                       0,
                                                                        0)
                 # The start method will signal the motion profile controller to start
                 self.motionProfileController.start()
@@ -64,15 +61,12 @@ class BoomToIntake(Command):
                                 self.robot.boom.POT_SCALE_POSITION_DEG)
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
-                # References to the talon PIDF slot index and the encoder tics per revolution
-                slotIndex = self.robot.boom.SWITCH_TO_INTAKE_SLOT_INDEX
-
                 # Create the motion profile controller object
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.intakeToScalePath,
                                                                        True,
                                                                        self.robot.boom.getPotPosition(),
-                                                                       slotIndex,
+                                                                       1,
                                                                        0)
                 # The start method will signal the motion profile controller to start
                 self.motionProfileController.start()

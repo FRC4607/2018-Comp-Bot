@@ -1,5 +1,6 @@
 from wpilib.command import Subsystem
 from ctre.wpi_talonsrx import WPI_TalonSRX
+from ctre._impl.autogen.ctre_sim_enums import LimitSwitchSource, LimitSwitchNormal
 from commands.boom_joystick import BoomJoystick
 from constants import BOOM_MOTOR, LOGGER_LEVEL
 import logging
@@ -14,14 +15,12 @@ class Boom(Subsystem):
     """
 
     ENCODER_TICS_PER_REV = 102.4  # 10-turn analog pot on 10-bit ADC: 1024 / 10
-    INTAKE_TO_SWITCH_SLOT_INDEX = 0
-    SWITCH_TO_INTAKE_SLOT_INDEX = 1
     POT_INTAKE_POSITION_DEG = 83 * (3600 / 1023)
     POT_SWITCH_POSITION_DEG = 409.2 * (3600 / 1023)  # ** TODO **
     POT_SCALE_POSITION_DEG = 716.1 * (3600 / 1023)  # ** TODO **
     POT_ERROR_LIMIT = 90.0
-    FORWARD_SOFT_LIMIT = 840
-    REVERSE_SOFT_LIMIT = 90
+    # FORWARD_SOFT_LIMIT = 840
+    # REVERSE_SOFT_LIMIT = 90
 
     def __init__(self, robot):
         super().__init__()
@@ -51,19 +50,26 @@ class Boom(Subsystem):
         # self.talon.enableCurrentLimit(True)
 
         # Add soft limits
-        self.talon.configForwardSoftLimitThreshold(self.FORWARD_SOFT_LIMIT, 0)
-        self.talon.configForwardSoftLimitEnable(True, 0)
+        # self.talon.configForwardSoftLimitThreshold(self.FORWARD_SOFT_LIMIT, 0)
+        # self.talon.configForwardSoftLimitEnable(True, 0)
         # self.talon.configReverseSoftLimitThreshold(self.REVERSE_SOFT_LIMIT, 0)
         # self.talon.configReverseSoftLimitEnable(True, 0)
 
+        # Configured forward and reverse limit switch of Talon to be from a feedback connector and
+        # be normally open
+        self.talon.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
+                                                  LimitSwitchNormal.NormallyOpen, 0, 10)
+        self.talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
+                                                  LimitSwitchNormal.NormallyOpen, 0, 10)
+
     def initClosedLoop(self):
-        # PIDF slot index 0 is for intake-to-switch
+        # PIDF slot index 0 is for single-position moves
         self.talon.config_kP(0, 1.0, 10)
         self.talon.config_kI(0, 0.0, 10)
         self.talon.config_kD(0, 0.0, 10)
         self.talon.config_kF(0, 22.73, 10)
 
-        # PIDF slot index 1 is for switch-to-intake
+        # PIDF slot index 1 is for multi-position moves
         self.talon.config_kP(1, 1.0, 10)
         self.talon.config_kI(1, 0.0, 10)
         self.talon.config_kD(1, 0.0, 10)
