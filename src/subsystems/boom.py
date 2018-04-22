@@ -16,8 +16,8 @@ class Boom(Subsystem):
 
     ENCODER_TICS_PER_REV = 102.4  # 10-turn analog pot on 10-bit ADC: 1024 / 10
     POT_INTAKE_POSITION_DEG = 83 * (3600 / 1023)
-    POT_SWITCH_POSITION_DEG = 409.2 * (3600 / 1023)  # ** TODO **
-    POT_SCALE_POSITION_DEG = 716.1 * (3600 / 1023)  # ** TODO **
+    POT_SWITCH_POSITION_DEG = 348 * (3600 / 1023)  # ** TODO **
+    POT_SCALE_POSITION_DEG = 825 * (3600 / 1023)  # ** TODO **
     POT_ERROR_LIMIT = 90.0
     # FORWARD_SOFT_LIMIT = 840
     # REVERSE_SOFT_LIMIT = 90
@@ -62,18 +62,22 @@ class Boom(Subsystem):
         self.talon.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector,
                                                   LimitSwitchNormal.NormallyOpen, 0, 10)
 
+        # Set brake/coast mode
+        self.talon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
+
+
     def initClosedLoop(self):
         # PIDF slot index 0 is for single-position moves
-        self.talon.config_kP(0, 1.0, 10)
+        self.talon.config_kP(0, 5.0, 10)
         self.talon.config_kI(0, 0.0, 10)
         self.talon.config_kD(0, 0.0, 10)
-        self.talon.config_kF(0, 22.73, 10)
+        self.talon.config_kF(0, 20, 10)
 
         # PIDF slot index 1 is for multi-position moves
         self.talon.config_kP(1, 1.0, 10)
         self.talon.config_kI(1, 0.0, 10)
         self.talon.config_kD(1, 0.0, 10)
-        self.talon.config_kF(1, 22.73, 10)
+        self.talon.config_kF(1, 22, 10)
 
         # Use analog potentiometer
         self.initAnalogPotentiometer()

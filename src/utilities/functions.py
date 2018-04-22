@@ -53,17 +53,17 @@ def GeneratePath(path_name, file_name, waypoints, settings):
     # Modify the path for the differential drive
     modifier = pf.modifiers.TankModifier(trajectory).modify(ROBOT_WHEELBASE_FT)
 
-    # Ge the left and right trajectories
-    leftTrajectory = modifier.getLeftTrajectory()
-    rightTrajectory = modifier.getRightTrajectory()
+    # Ge the left and right trajectories...left and right are reversed
+    rightTrajectory = modifier.getLeftTrajectory()
+    leftTrajectory = modifier.getRightTrajectory()
 
 
     # Grab the position, velocity + acceleration for feed-forward, heading, and duration
     path = {"left": [], "right": []}
     output = open(os.path.join(FILE_OUTPUT_PATH, file_name+".txt"), "w")
-    output.write("x, y, pos, vel, acc, heading, "
-                 "L_x, L_y, L_pos, L_vel, L_acc, L_heading, "
-                 "R_x, R_y, R_pos, R_vel, R_acc, R_heading\n")
+    output.write("x, y, dt, pos, vel, acc, heading, "
+                 "L_x, L_y, L_dt, L_pos, L_vel, L_acc, L_heading, "
+                 "R_x, R_y, R_dt, R_pos, R_vel, R_acc, R_heading\n")
     for i in range(len(leftTrajectory)):
         path["left"].append([leftTrajectory[i].position * 4096 /
                              (ROBOT_WHEEL_DIAMETER_FT * math.pi),
@@ -82,16 +82,16 @@ def GeneratePath(path_name, file_name, waypoints, settings):
 
         # It's easier to see the path when plotting the X data as the Y-axis and the Y data as the
         # X-axis in openoffice.
-        output.write("%2.4f, %2.4f, %3.4f, %3.4f, %3.4f, %3.4f, "
-                     "%2.4f, %2.4f, %3.4f, %3.4f, %3.4f, %3.4f, "
-                     "%2.4f, %2.4f, %3.4f, %3.4f, %3.4f, %3.4f\n" %
-                     (trajectory[i].x, trajectory[i].y,
+        output.write("%2.4f, %2.4f, %2.4f, %3.4f, %3.4f, %3.4f, %3.4f, "
+                     "%2.4f, %2.4f, %2.4f, %3.4f, %3.4f, %3.4f, %3.4f, "
+                     "%2.4f, %2.4f, %2.4f, %3.4f, %3.4f, %3.4f, %3.4f\n" %
+                     (trajectory[i].x, trajectory[i].y, trajectory[i].dt,
                       trajectory[i].position, trajectory[i].velocity,
                       trajectory[i].acceleration, pf.r2d(trajectory[i].heading),
-                      leftTrajectory[i].x, leftTrajectory[i].y,
+                      leftTrajectory[i].x, leftTrajectory[i].y, leftTrajectory[i].dt,
                       leftTrajectory[i].position, leftTrajectory[i].velocity,
                       leftTrajectory[i].acceleration, pf.r2d(leftTrajectory[i].heading),
-                      rightTrajectory[i].x, rightTrajectory[i].y,
+                      rightTrajectory[i].x, rightTrajectory[i].y, rightTrajectory[i].dt,
                       rightTrajectory[i].position, rightTrajectory[i].velocity,
                       rightTrajectory[i].acceleration, pf.r2d(rightTrajectory[i].heading)))
     output.close()

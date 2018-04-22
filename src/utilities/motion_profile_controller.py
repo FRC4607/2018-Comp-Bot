@@ -19,7 +19,7 @@ class MotionProfileController():
     """
 
     NOTIFIER_DEBUG_CNT = 100
-    MIN_NUM_POINTS = 50
+    MIN_NUM_POINTS = 5
     NUM_LOOPS_TIMEOUT = 10
 
     def __init__(self, talon, points, reverse, starting_position,
@@ -52,8 +52,7 @@ class MotionProfileController():
         # stream_rate_ms is greater than 40ms, then it would be better to call
         # streamMotionProfileBuffer() in the teleop/autonomous loops since we will stream at twice
         # the rate of the motion profile
-        self._getTrajectoryDuration(points[0][2])
-        self._streamRateMS = int(points[0][2] / 2)
+        self._streamRateMS = int(points[0][3] / 2)
         self._notifier = Notifier(self._streamToMotionProfileBuffer)
 
     def start(self):
@@ -80,22 +79,10 @@ class MotionProfileController():
         # Get the current _status
         self._status = self._talon.getMotionProfileStatus()
 
-        # Service the loop timeout
-        if self._loopTimeout < 0:
-            pass
-        else:
-            if self._loopTimeout == 0:
-                logger.warning("No progress being made - State = %i" % (self._state))
-                self._outputStatus()
-            else:
-                self._loopTimeout -= 1
-
         # Waiting for the start signal.  Once received, make sure the Talon MPE is in a state to
         # begin executing a new motion profile.
         if self._state == 0:
             if self._start:
-                logger.info("Starting the Motion Profile Controller")
-
                 # Make sure the Talon MPE is disabled before servicing the start signal
                 if self._status.outputEnable != SetValueMotionProfile.Disable:
                     logger.warning("Disabling the Talon MPE")
@@ -115,9 +102,10 @@ class MotionProfileController():
                 # The Talon MPE status is in a good state, start filling the top buffer and kick
                 # off the notifier which moves the top buffer data into the bottom buffer.
                 else:
+                    logger.info("Starting the Motion Profile Controller")
                     self._start = False
                     self._state = 1
-                    self._loopTimeout = self.MIN_NUM_POINTS
+                    self._loopTimeout = self.NUM_LOOPS_TIMEOUT
                     self._startFilling()
                     self._notifier.startPeriodic(self._streamRateMS / 1000)
                     logger.info("Started Motion Profile Controller _notifier")
@@ -125,10 +113,10 @@ class MotionProfileController():
         # The Talon MPE has started filling the buffer.  Once enough points have been loaded into
         # the bottom buffer, enable the Talon MPE.
         elif self._state == 1:
-            if self._status.btmBufferCnt > self.NUM_LOOPS_TIMEOUT:
+            if self._status.btmBufferCnt > self.MIN_NUM_POINTS:
                 logger.info("Talon MPE bottom buffer is ready, enabling the Talon MPE")
                 self._state = 2
-                self._loopTimeout = self.MIN_NUM_POINTS
+                self._loopTimeout = self.NUM_LOOPS_TIMEOUT
                 self._talon.set(WPI_TalonSRX.ControlMode.MotionProfile,
                                 SetValueMotionProfile.Enable)
 
@@ -138,7 +126,9 @@ class MotionProfileController():
         # ***** TODO ***** (may want to go to neutral instead)
         elif self._state == 2:
             if not self._status.isUnderrun:
-                self._loopTimeout = self.MIN_NUM_POINTS
+                self._loopTimeout = self.NUM_LOOPS_TIMEOUT
+            else:
+                self._outputStatus()
 
             if self._status.activePointValid and self._status.isLast:
                 logger.info("Talon MPE is at the last trajectory point")
@@ -147,7 +137,7 @@ class MotionProfileController():
                 logger.info("Called to stop Motion Profile Controller notifier")
                 self._talon.set(WPI_TalonSRX.ControlMode.MotionProfile,
                                 SetValueMotionProfile.Disable)
-
+            
         elif self._state == 3:
             self._state = 0
             self._loopTimeout -= 1
@@ -156,6 +146,18 @@ class MotionProfileController():
             # Remove the reference to the notifier and hopefully the notifier will be stopped
             self._notifier.free()
             del(self._notifier)
+
+        # Service the loop timeout
+        if self._loopTimeout < 0:
+            pass
+        else:
+            if self._loopTimeout == 0:
+                logger.warning("No progress being made - State = %i" % (self._state))
+                self._outputStatus()
+                self._state = 3
+                self._notifier.stop()
+            else:
+                self._loopTimeout -= 1
 
     def _initialize(self):
         """
@@ -183,7 +185,12 @@ class MotionProfileController():
             self._debugCnt = self.NOTIFIER_DEBUG_CNT
         else:
             self._debugCnt -= 1
-        self._talon.processMotionProfileBuffer()
+        if self._status.btmBufferCnt < 100:
+            self._talon.processMotionProfileBuffer()
+            #=======================================================================================
+            # logger.info("leftbtmBufferCnt: %i, rightbtmBufferCnt: %i," %
+            #       (self._leftStatus.btmBufferCnt, self._rightStatus.btmBufferCnt))
+            #=======================================================================================
 
     def _getTrajectoryDuration(self, duration):
         """
@@ -215,10 +222,10 @@ class MotionProfileController():
         """
         for i in range(len(self._points)):
             if self.reverse:
-                self._point.position = self.startingPostion - self._points[i][0]
+                self._point.position = -self._points[i][0]
                 self._point.velocity = -self._points[i][1]
             else:
-                self._point.position = self.startingPostion + self._points[i][0]
+                self._point.position = self._points[i][0]
                 self._point.velocity = self._points[i][1]
             self._point.auxiliaryPos = self._points[i][2]
             self._point.profileSlotSelect0 = self._profileSlotSelect0

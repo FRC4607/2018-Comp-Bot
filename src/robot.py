@@ -10,7 +10,7 @@ from oi import OI
 from autonomous.autonomous_chooser import *
 from autonomous.auton_forward import AutonForward
 from autonomous.auton_middle_start_left_switch import AutonMiddleStartLeftSwitch
-from autonomous.auton_left_start_left_scale import AutonMiddleStartLeftScale
+from autonomous.auton_left_start_left_scale import AutonLeftStartLeftScale
 from constants import BOOM_STATE, LOGGER_LEVEL
 import logging
 logger = logging.getLogger(__name__)
@@ -39,16 +39,6 @@ class Pitchfork(TimedRobot):
         self.smartDashboard = SmartDashboard()
 
         # Create the sendable choosers to get the autonomous preferences
-        self.positionChooser = SendableChooser()
-        self.startingLeft = StartingLeft()
-        self.startingRight = StartingRight()
-        self.startingMiddle = StartingMiddle()
-        self.positionChooser.addObject("Start Left", self.startingLeft)
-        self.positionChooser.addObject("Start Right", self.startingRight)
-        self.positionChooser.addObject("Start Middle", self.startingMiddle)
-        self.positionChooser.addDefault("Start Left", self.startingLeft)
-        self.smartDashboard.putData("Starting Position", self.positionChooser)
-
         self.scoringElementChooser = SendableChooser()
         self.scoreScale = ScoreScale()
         self.scoreSwitch = ScoreSwitch()
@@ -65,6 +55,16 @@ class Pitchfork(TimedRobot):
         self.crossFieldChooser.addDefault("Cross Field Disable", self.crossFieldDisable)
         self.smartDashboard.putData("Cross Field Enable", self.crossFieldChooser)
 
+        self.positionChooser = SendableChooser()
+        self.startingLeft = StartingLeft()
+        self.startingRight = StartingRight()
+        self.startingMiddle = StartingMiddle()
+        self.positionChooser.addObject("Start Left", self.startingLeft)
+        self.positionChooser.addObject("Start Right", self.startingRight)
+        self.positionChooser.addObject("Start Middle", self.startingMiddle)
+        self.positionChooser.addDefault("Start Middle", self.startingMiddle)
+        self.smartDashboard.putData("Starting Position", self.positionChooser)
+
         # Create a timer for data logging
         self.timer = Timer()
 
@@ -74,26 +74,40 @@ class Pitchfork(TimedRobot):
         # Boom state start at the scale
         self.boomState = BOOM_STATE.Scale
 
+        self.autonForward = AutonForward(self)
+        self.autonMiddleStartLeftSwitch = AutonMiddleStartLeftSwitch(self)
+        self.autonLeftStartLeftScale = AutonLeftStartLeftScale(self)
+
+
         # Output debug data to the smartdashboard
         if LOGGER_LEVEL == logging.DEBUG:
-            self.smartDashboard.putNumber("RightEncPos", 0.0)
-            self.smartDashboard.putNumber("RightActPos", 0.0)
-            self.smartDashboard.putNumber("RightEncVel", 0.0)
-            self.smartDashboard.putNumber("RightActVel", 0.0)
-            self.smartDashboard.putNumber("RightPrimaryTarget", 0.0)
-            self.smartDashboard.putNumber("RightPrimaryError", 0.0)
+            #=======================================================================================
+            # self.smartDashboard.putNumber("RightEncPos", 0.0)
+            # self.smartDashboard.putNumber("RightActPos", 0.0)
+            # self.smartDashboard.putNumber("RightEncVel", 0.0)
+            # self.smartDashboard.putNumber("RightActVel", 0.0)
+            # self.smartDashboard.putNumber("RightPrimaryTarget", 0.0)
+            # self.smartDashboard.putNumber("RightPrimaryError", 0.0)
+            # self.smartDashboard.putNumber("TimeStamp", 0.0)
+            # self.smartDashboard.putNumber("LeftEncPos", 0.0)
+            # self.smartDashboard.putNumber("LeftActPos", 0.0)
+            # self.smartDashboard.putNumber("LeftEncVel", 0.0)
+            # self.smartDashboard.putNumber("LeftActVel", 0.0)
+            # self.smartDashboard.putNumber("LeftPrimaryTarget", 0.0)
+            # self.smartDashboard.putNumber("LeftPrimaryError", 0.0)
+            # self.smartDashboard.putNumber("RightTopBufferCount", 0.0)
+            # self.smartDashboard.putNumber("LeftTopBufferCount", 0.0)
+            # self.smartDashboard.putNumber("LeftBottomBufferCount", 0.0)
+            # self.smartDashboard.putNumber("RightBottomBufferCount", 0.0)
+            #=======================================================================================
+            self.smartDashboard.putNumber("EncPos", 0.0)
+            self.smartDashboard.putNumber("ActPos", 0.0)
+            self.smartDashboard.putNumber("EncVel", 0.0)
+            self.smartDashboard.putNumber("ActVel", 0.0)
+            self.smartDashboard.putNumber("PrimaryTarget", 0.0)
+            self.smartDashboard.putNumber("PrimaryError", 0.0)
             self.smartDashboard.putNumber("TimeStamp", 0.0)
-            self.smartDashboard.putNumber("LeftEncPos", 0.0)
-            self.smartDashboard.putNumber("LeftActPos", 0.0)
-            self.smartDashboard.putNumber("LeftEncVel", 0.0)
-            self.smartDashboard.putNumber("LeftActVel", 0.0)
-            self.smartDashboard.putNumber("LeftPrimaryTarget", 0.0)
-            self.smartDashboard.putNumber("LeftPrimaryError", 0.0)
-            self.smartDashboard.putNumber("RightTopBufferCount", 0.0)
-            self.smartDashboard.putNumber("LeftTopBufferCount", 0.0)
-            self.smartDashboard.putNumber("LeftBottomBufferCount", 0.0)
-            self.smartDashboard.putNumber("RightBottomBufferCount", 0.0)
-
+            
     def disabledInit(self):
         """
         Initialization code for disabled mode should go here.  This method will be called each
@@ -118,121 +132,42 @@ class Pitchfork(TimedRobot):
         Initialization code for autonomous mode should go here.  This method will be called each
         time the robot enters autonomous mode.
         """
+        self.scheduleAutonomous = True
         if not self.timer.running:
             self.timer.start()
 
         # Get the prioritized scoring element, robot starting posion, and the alliance
         # scale/switch data.
-        self.startingPosition = self.positionChooser.getSelected().getStartingPosition()
-        self.scoringElement = self.scoringElementChooser.getSelected().getScoringElement()
-        self.crossFieldEnable = self.crossFieldChooser.getSelected().getCrossFieldEnable()
-
-        # The game specific data will be a 3-character string representing where the teams switch,
-        # scale, switch are located.  For example, "LRR" means your teams closest switch is on the
-        # left (as you look out onto the field from the drivers station).  The teams scale is on
-        # the right, and the switch furthest away is also on the right.
+        self.selectedCrossFieldEnable = self.crossFieldChooser.getSelected()
+        self.selectedScoringElement = self.scoringElementChooser.getSelected()
+        self.selectedStartingPosition = self.positionChooser.getSelected()
+        
         self.gameData = DriverStation.getInstance().getGameSpecificMessage()
 
-        logger.info("Game Data: %s" % (self.gameData))
-        logger.info("Cross Field Enable: %s" % (self.crossFieldEnable))
-        logger.info("Starting Position %s" % (self.startingPosition))
-        logger.info("Scoring Element %s" % (self.scoringElement))
-
-        self.autonForward = AutonForward(self)
-        self.autonMiddleStartLeftSwitch = AutonMiddleStartLeftSwitch(self)
-        self.autonMiddleStartLeftScale = AutonMiddleStartLeftScale(self)
-
-        if self.startingPosition == "Left":
-            self.autonMiddleStartLeftScale.start()
-        elif self.startingPosition == "Middle":
-            self.autonMiddleStartLeftSwitch.start()
-        else:
-            self.autonForward.start()
-
-#==================================================================================================
-#         # Starting on the left side
-#         if self.startingPosition == "Left":
-# 
-#             # Want to do scale
-#             if self.scoringElement == "Scale":
-#                 if self.gameData[1] == "L":
-#                     logger.info("Start Left, Left Scale")
-# 
-#                 elif self.gameData[1] == "R" and self.crossFieldEnable:
-#                     logger.info("Start Left, Right Scale")
-# 
-#                 elif self.gameData[0] == "L":
-#                     logger.info("Start Left, Left Switch")
-# 
-#                 else:
-#                     logger.info("Start Left, Go Forward")
-#                     self.autonForward = AutonForward(self)
-#                     self.autonForward.start()
-# 
-#             # Want to do the switch
-#             elif self._scoringElement == "Switch":
-#                 if self.gameData[0] == "L":
-#                     logger.info("Start Left, Left Switch")
-# 
-#                 elif self.gameData[0] == "R" and self.crossFieldEnable:
-#                     logger.info("Start Left, Right Switch")
-# 
-#                 elif self.gameData[1] == "L":
-#                     logger.info("Start Left, Left Scale")
-# 
-#                 else:
-#                     logger.info("Start Left, Go Forward")
-#                     self.autonForward = AutonForward(self)
-#                     self.autonForward.start()
-# 
-#         # Starting on the right side
-#         elif self._startingPosition == "Right":
-# 
-#             # Want to do scale
-#             if self._scoringElement == "Scale":
-#                 if self.gameData[1] == "R":
-#                     logger.info("Start Right, Right Scale")
-# 
-#                 elif self.gameData[1] == "L" and self.crossFieldEnable:
-#                     logger.info("Start Right, Left Scale")
-# 
-#                 elif self.gameData[0] == "R":
-#                     logger.info("Start Right, Right Switch")
-# 
-#                 else:
-#                     logger.info("Start Right, Go Forward")
-#                     self.autonForward = AutonForward(self)
-#                     self.autonForward.start()
-# 
-#             # Want to do the switch
-#             elif self.scoringElement == "Switch":
-#                 if self.gameData[0] == "R":
-#                     logger.info("Start Right, Right Switch")
-# 
-#                 elif self.gameData[0] == "L" and self.crossFieldEnable:
-#                     logger.info("Start Right, Left Switch")
-# 
-#                 elif self.gameData[1] == "R":
-#                     logger.info("Start Right, Right Scale")
-# 
-#                 else:
-#                     logger.info("Start Right, Go Forward")
-#                     self.autonForward = AutonForward(self)
-#                     self.autonForward.start()
-# 
-#         # Starting in the middle
-#         elif self.startingPosition == "Middle":
-#             if self.gameData[0] == "R":
-#                 logger.info("Start Middle, Right Switch")
-# 
-#             elif self.gameData[0] == "L":
-#                 logger.info("Start Middle, Left Switch")
-#==================================================================================================
+        self.crossFieldEnable = self.selectedCrossFieldEnable.getCrossFieldEnable()
+        self.scoringElement = self.selectedScoringElement.getScoringElement()        
+        self.startingPosition = self.selectedStartingPosition.getStartingPosition()
 
     def autonomousPeriodic(self):
         """
         Periodic code for autonomous mode should go here.  This method will be called every 20ms.
         """
+        # The game specific data will be a 3-character string representing where the teams switch,
+        # scale, switch are located.  For example, "LRR" means your teams closest switch is on the
+        # left (as you look out onto the field from the drivers station).  The teams scale is on
+        # the right, and the switch furthest away is also on the right.
+        if self.scheduleAutonomous:
+            self.scheduleAutonomous = False
+            logger.info("Game Data: %s" % (self.gameData))
+            logger.info("Cross Field Enable: %s" % (self.crossFieldEnable))
+            logger.info("Scoring Element %s" % (self.scoringElement))
+            logger.info("Starting Position %s" % (self.startingPosition))    
+  
+            self.autonMiddleStartLeftSwitch.start()
+            #self.autonLeftStartLeftScale.start()
+            #self.autonForward.start()
+
+        
         Scheduler.getInstance().run()
 
     def teleopInit(self):

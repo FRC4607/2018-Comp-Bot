@@ -19,10 +19,14 @@ class DrivetrainMPController():
     """
 
     NOTIFIER_DEBUG_CNT = 100
-    MIN_NUM_POINTS = 50
-    NUM_LOOPS_TIMEOUT = 10
-    SYNC_CONSTANT = 2
+    MIN_NUM_POINTS = 90
+    NUM_LOOPS_TIMEOUT = 10000
+    # SYNC_CONSTANT = 2
+    SYNC_CONSTANT = 0
     SYNC_SIDE_LEFT = True
+    MP_TYPE = WPI_TalonSRX.ControlMode.MotionProfileArc
+    #  MP_TYPE = WPI_TalonSRX.ControlMode.MotionProfile
+    
 
     def __init__(self, left_talon, left_points, right_talon, right_points,
                  profile_slot_select0, profile_slot_select1):
@@ -56,8 +60,7 @@ class DrivetrainMPController():
         # stream_rate_ms is greater than 40ms, then it would be better to call
         # streamMotionProfileBuffer() in the teleop/autonomous loops since we will stream at twice
         # the rate of the motion profile
-        self._getTrajectoryDuration(left_points[0][2])
-        self._streamRateMS = int(left_points[0][2] / 2)
+        self._streamRateMS = int(left_points[0][3] / 2)
         self._notifier = Notifier(self._streamToMotionProfileBuffer)
 
     def start(self):
@@ -85,30 +88,18 @@ class DrivetrainMPController():
         self._leftStatus = self._leftTalon.getMotionProfileStatus()
         self._rightStatus = self._rightTalon.getMotionProfileStatus()
 
-        # Service the loop timeout
-        if self._loopTimeout < 0:
-            pass
-        else:
-            if self._loopTimeout == 0:
-                logger.warning("No progress being made - State = %i" % (self._state))
-                self._outputStatus()
-            else:
-                self._loopTimeout -= 1
-
         # Waiting for the start signal.  Once received, make sure the Talon MPE is in a state to
         # begin executing a new motion profile.
         if self._state == 0:
             if self._start:
-                logger.info("Starting the Motion Profile Controller")
-
                 # Make sure the Talon MPE is disabled before servicing the start signal
                 if self._leftStatus.outputEnable != SetValueMotionProfile.Disable:
                     logger.warning("Disabling the Left Talon MPE")
-                    self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
+                    self._leftTalon.set(self.MP_TYPE,
                                         SetValueMotionProfile.Disable)
                 elif self._rightStatus.outputEnable != SetValueMotionProfile.Disable:
                     logger.warning("Disabling the Right Talon MPE")
-                    self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
+                    self._rightTalon.set(self.MP_TYPE,
                                          SetValueMotionProfile.Disable)
 
                 # Log any prior underrun conitions
@@ -130,9 +121,11 @@ class DrivetrainMPController():
                 # The Talon MPE status is in a good state, start filling the top buffer and kick
                 # off the notifier which moves the top buffer data into the bottom buffer.
                 else:
+                    logger.info("Starting the Motion Profile Controller")
+                    self._outputStatus()
                     self._start = False
                     self._state = 1
-                    self._loopTimeout = self.MIN_NUM_POINTS
+                    self._loopTimeout = self.NUM_LOOPS_TIMEOUT
                     self._startFilling()
                     self._notifier.startPeriodic(self._streamRateMS / 1000)
                     logger.info("Started Motion Profile Controller _notifier")
@@ -142,11 +135,12 @@ class DrivetrainMPController():
         elif self._state == 1:
             if (self._leftStatus.btmBufferCnt > self.MIN_NUM_POINTS and
                     self._rightStatus.btmBufferCnt > self.MIN_NUM_POINTS):
+                logger.info("Talon MPE bottom buffer is ready, enabling the Talon MPE")
                 self._state = 2
-                self._loopTimeout = self.MIN_NUM_POINTS
-                self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
+                self._loopTimeout = self.NUM_LOOPS_TIMEOUT
+                self._leftTalon.set(self.MP_TYPE,
                                     SetValueMotionProfile.Enable)
-                self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
+                self._rightTalon.set(self.MP_TYPE,
                                      SetValueMotionProfile.Enable)
         # Check status of the MP and if there isn't an underrun condition, reset the loop timeout.
         # Once the last point has been processed, stop the notifier and set the Talon MPE to hold
@@ -154,12 +148,9 @@ class DrivetrainMPController():
         # ***** TODO ***** (may want to go to neutral instead)
         elif self._state == 2:
             if not self._leftStatus.isUnderrun and not self._rightStatus.isUnderrun:
-                logger.debug("Left Buffer: %i, Right Buffer: %i" %
-                             (self._leftStatus.topBufferCnt, self._rightStatus.topBufferCnt))
-                self._loopTimeout = self.MIN_NUM_POINTS
+                self._loopTimeout = self.NUM_LOOPS_TIMEOUT
             else:
-                logger.warning("Talon MPE UNDERRUN: left: %s, Right: %s" %
-                               (self._leftStatus.isUnderrun, self._rightStatus.isUnderrun))
+                self._outputStatus()
 
             if (self._leftStatus.activePointValid and self._leftStatus.isLast and
                     self._rightStatus.activePointValid and self._rightStatus.isLast):
@@ -167,9 +158,9 @@ class DrivetrainMPController():
                 self._state = 3
                 self._notifier.stop()
                 logger.info("Called to stop Motion Profile Controller notifier")
-                self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
+                self._leftTalon.set(self.MP_TYPE,
                                     SetValueMotionProfile.Disable)
-                self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
+                self._rightTalon.set(self.MP_TYPE,
                                      SetValueMotionProfile.Disable)
 
             # Output debug data to the smartdashboard
@@ -179,25 +170,13 @@ class DrivetrainMPController():
                 smart_dashboard.putNumber("RightActPos",
                                           self._rightTalon.getActiveTrajectoryPosition())
                 smart_dashboard.putNumber("RightEncVel",
-                                          self._rightTalon.getQuadratureVelocity())
-                smart_dashboard.putNumber("RightActVel",
-                                          self._rightTalon.getActiveTrajectoryPosition())
-                smart_dashboard.putNumber("RightPrimaryTarget",
-                                          self._rightTalon.getClosedLoopTarget(0))
-                smart_dashboard.putNumber("RightPrimaryError",
-                                          self._rightTalon.getClosedLoopError(0))
-                smart_dashboard.putNumber("LeftEncPos",
-                                          self._leftTalon.getSensorCollection().getQuadraturePosition())
-                smart_dashboard.putNumber("LeftActPos",
-                                          self._leftTalon.getActiveTrajectoryPosition())
-                smart_dashboard.putNumber("LeftEncVel",
-                                          self._leftTalon.getQuadratureVelocity())
-                smart_dashboard.putNumber("LeftActVel",
-                                          self._leftTalon.getActiveTrajectoryPosition())
-                smart_dashboard.putNumber("LeftPrimaryTarget",
-                                          self._leftTalon.getClosedLoopTarget(0))
-                smart_dashboard.putNumber("LeftPrimaryError",
-                                          self._leftTalon.getClosedLoopError(0))
+                                          self._rightTalon.getAnalogInVel())
+                smart_dashboard.putNumber("ActVel",
+                                          self._talon.getActiveTrajectoryPosition())
+                smart_dashboard.putNumber("PrimaryTarget",
+                                          self._talon.getClosedLoopTarget(0))
+                smart_dashboard.putNumber("PrimaryError",
+                                          self._talon.getClosedLoopError(0))
                 smart_dashboard.putNumber("RightTopBufferCount", self._rightStatus.topBufferCnt)
                 smart_dashboard.putNumber("LeftTopBufferCount", self._leftStatus.topBufferCnt)
                 smart_dashboard.putNumber("LeftBottomBufferCount", self._leftStatus.btmBufferCnt)
@@ -213,15 +192,27 @@ class DrivetrainMPController():
             self._notifier.free()
             del(self._notifier)
 
+        # Service the loop timeout
+        if self._loopTimeout < 0:
+            pass
+        else:
+            if self._loopTimeout == 0:
+                logger.warning("No progress being made - State = %i" % (self._state))
+                self._outputStatus()
+                self._state = 3
+                self._notifier.stop()
+            else:
+                self._loopTimeout -= 1
+
     def _initialize(self):
         """
         This method will initialize the motion profile controller by clearing out any trajectories
         still in the buffer, setting the control mode to motion profile (disabled), change the
         control frame period to the stream rate, and clearing any prior buffer underruns.
         """
-        self._leftTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
+        self._leftTalon.set(self.MP_TYPE,
                             SetValueMotionProfile.Disable)
-        self._rightTalon.set(WPI_TalonSRX.ControlMode.MotionProfileArc,
+        self._rightTalon.set(self.MP_TYPE,
                              SetValueMotionProfile.Disable)
         if self._leftStatus.hasUnderrun:
             logger.warning("Clearing Left Talon UNDERRUN condition during reset")
@@ -230,10 +221,10 @@ class DrivetrainMPController():
             logger.warning("Clearing Right Talon UNDERRUN condition during reset")
             self._rightTalon.clearMotionProfileHasUnderrun(0)
         if self._leftStatus.btmBufferCnt != 0 or self._leftStatus.topBufferCnt != 0:
-            logger.warning("Clearing Left Talon MPE buffer(s)")
+            logger.warning("Clearing Left Talon MPE buffer(s) during reset")
             self._leftTalon.clearMotionProfileTrajectories()
         if self._rightStatus.btmBufferCnt != 0 or self._leftStatus.topBufferCnt != 0:
-            logger.warning("Clearing Right Talon MPE buffer(s)")
+            logger.warning("Clearing Right Talon MPE buffer(s) during reset")
             self._rightTalon.clearMotionProfileTrajectories()
 
     def _streamToMotionProfileBuffer(self):
@@ -246,8 +237,11 @@ class DrivetrainMPController():
             self._debugCnt = self.NOTIFIER_DEBUG_CNT
         else:
             self._debugCnt -= 1
-        self._leftTalon.processMotionProfileBuffer()
-        self._rightTalon.processMotionProfileBuffer()
+        if self._leftStatus.btmBufferCnt < 100 and self._rightStatus.btmBufferCnt < 100:
+            self._leftTalon.processMotionProfileBuffer()
+            self._rightTalon.processMotionProfileBuffer()
+            logger.info("leftbtmBufferCnt: %i, rightbtmBufferCnt: %i," %
+                  (self._leftStatus.btmBufferCnt, self._rightStatus.btmBufferCnt))
 
     def _getTrajectoryDuration(self, duration):
         """
@@ -285,7 +279,7 @@ class DrivetrainMPController():
                 self._leftPoint.profileSlotSelect0 = self._profileSlotSelect0
                 self._leftPoint.profileSlotSelect1 = self._profileSlotSelect1
                 self._leftPoint.timeDur = self._getTrajectoryDuration(self._leftPoints[0][3])
-                self._leftPoint.zeroPos = False
+                self._leftPoint.zeroPos = True
                 self._leftPoint.isLastPoint = False
                 self._leftTalon.pushMotionProfileTrajectory(self._leftPoint)
 
@@ -298,7 +292,8 @@ class DrivetrainMPController():
             self._leftPoint.timeDur = self._getTrajectoryDuration(self._leftPoints[i][3])
             self._leftPoint.zeroPos = False
             if i == 0:
-                self._leftPoint.zeroPos = True
+                if self.SYNC_CONSTANT != 0:
+                    self._leftPoint.zeroPos = True
             self._leftPoint.isLastPoint = False
             if i+1 == len(self._leftPoints):
                 self._leftPoint.isLastPoint = True
@@ -320,14 +315,14 @@ class DrivetrainMPController():
 
     def _outputStatus(self):
         logger.warning("LEFT: isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, "
-                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
+                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s, mode: %i, timeDureMS: %i" %
                        (self._leftStatus.isUnderrun, self._leftStatus.hasUnderrun,
                         self._leftStatus.topBufferRem, self._leftStatus.topBufferCnt,
                         self._leftStatus.btmBufferCnt, self._leftStatus.activePointValid,
-                        self._leftStatus.isLast))
+                        self._leftStatus.isLast, self._leftStatus.outputEnable, self._leftStatus.timeDurMs))
         logger.warning("RIGHT: isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, "
-                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s" %
+                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s, mode: %i, timeDureMS: %i" %
                        (self._rightStatus.isUnderrun, self._rightStatus.hasUnderrun,
                         self._rightStatus.topBufferRem, self._rightStatus.topBufferCnt,
                         self._rightStatus.btmBufferCnt, self._rightStatus.activePointValid,
-                        self._rightStatus.isLast))
+                        self._rightStatus.isLast, self._rightStatus.outputEnable, self._rightStatus.timeDurMs))

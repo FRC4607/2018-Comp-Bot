@@ -16,7 +16,7 @@ class MiddleStartLeftSwitchPathFollower(Command):
     def __init__(self, robot):
         super().__init__()
         self.requires(robot.driveTrain)
-        self.setInterruptible(False)
+        # self.setInterruptible(False)
 
         # Create references to the robot
         self.robot = robot

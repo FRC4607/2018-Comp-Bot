@@ -10,9 +10,9 @@ class settings():
     order = pf.FIT_HERMITE_QUINTIC
     samples = 1000000
     period = 0.02
-    maxVelocity = 5.0
+    maxVelocity = 7.0
     maxAcceleration = 10
-    maxJerk = 15
+    maxJerk = 30
 
 # The waypoints are entered as X, Y, and Theta. Theta is measured clockwise from the X-axis and
 # is in units of radians. It is important to generate the paths in a consistent manner to those
