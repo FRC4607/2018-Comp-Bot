@@ -4,10 +4,10 @@ from utilities.functions import GenerateMotionProfile
 
 
 SAMPLE_PERIOD = 10                  # MS
-DISTANCE = 7.0                      # rotations
+DISTANCE = 8.05                     # rotations (825 native units)
 MAX_VELOCITY = 4.0                  # rotations / second
-MAX_ACCELERATION = 10.0             # rotations / second^2
-MAX_JERK = 50.0                     # rotations / second^3
+MAX_ACCELERATION = 8.0              # rotations / second^2
+MAX_JERK = 15.0                     # rotations / second^3
 POSITION_UNITS = 1023 * (1 / 10)    # 10-bit ADC / 10-turn pot...rotations
 VELOCITY_UNITS = 1023 / 100         # 10-bit ADC / 100ms...natural units of Talon velocity
 

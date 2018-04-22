@@ -1,54 +1,54 @@
 class StartingLeft():
     def __init__(self):
-        self._startingPosition = "Left"
+        self.startingPosition = "Left"
 
     def getStartingPosition(self):
-        return self._startingPosition
+        return self.startingPosition
 
 
 class StartingMiddle():
     def __init__(self):
-        self._startingPosition = "Middle"
+        self.startingPosition = "Middle"
 
     def getStartingPosition(self):
-        return self._startingPosition
+        return self.startingPosition
 
 
 class StartingRight():
     def __init__(self):
-        self._startingPosition = "Right"
+        self.startingPosition = "Right"
 
     def getStartingPosition(self):
-        return self._startingPosition
+        return self.startingPosition
 
 
 class ScoreScale():
     def __init__(self):
-        self._scoringElement = "Scale"
+        self.scoringElement = "Scale"
 
     def getScoringElement(self):
-        return self._scoringElement
+        return self.scoringElement
 
 
 class ScoreSwitch():
     def __init__(self):
-        self._scoringElement = "Switch"
+        self.scoringElement = "Switch"
 
     def getScoringElement(self):
-        return self._scoringElement
+        return self.scoringElement
 
 
 class CrossFieldEnable():
     def __init__(self):
-        self._crossFieldEnable = True
+        self.crossFieldEnable = True
 
     def getCrossFieldEnable(self):
-        return self._crossFieldEnable
+        return self.crossFieldEnable
 
 
 class CrossFieldDisable():
     def __init__(self):
-        self._crossFieldEnable = False
+        self.crossFieldEnable = False
 
     def getCrossFieldEnable(self):
-        return self._crossFieldEnable
+        return self.crossFieldEnable

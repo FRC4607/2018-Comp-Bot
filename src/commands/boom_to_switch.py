@@ -38,10 +38,11 @@ class BoomToSwitch(Command):
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
                 # Create the motion profile controller object
+                startingPostion = self.robot.boom.getPotPosition()
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.intakeToSwitchPath,
                                                                        False,
-                                                                       self.robot.boom.getPotPosition(),
+                                                                       startingPostion,
                                                                        0,
                                                                        0)
                 # The start method will signal the motion profile controller to start
@@ -61,10 +62,11 @@ class BoomToSwitch(Command):
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
                 # Create the motion profile controller object
+                startingPostion = self.robot.boom.getPotPosition()
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.switchToScalePath,
                                                                        True,
-                                                                       self.robot.boom.getPotPosition(),
+                                                                       startingPostion,
                                                                        0,
                                                                        0)
                 # The start method will signal the motion profile controller to start
@@ -91,23 +93,29 @@ class BoomToSwitch(Command):
             # Output debug data to the smartdashboard
             if LOGGER_LEVEL == logging.DEBUG:
                 self.robot.smartDashboard.putNumber("EncPos",
-                                                    self.robot.boom.getPotPositionInDegrees())
+                                                    self.robot.boom.talon.getSensorCollection().getAnalogInRaw())
                 self.robot.smartDashboard.putNumber("ActPos",
-                                                    self.robot.boom.getActiveMPPosition())
+                                                    self.robot.boom.talon.getActiveTrajectoryPosition())
                 self.robot.smartDashboard.putNumber("EncVel",
-                                                    self.robot.boom.getPotVelocityInDegPer100ms())
+                                                    self.robot.boom.talon.getAnalogInVel())
                 self.robot.smartDashboard.putNumber("ActVel",
-                                                    self.robot.boom.getActiveMPVelocity())
-                self.robot.smartDashboard.putNumber("Target",
-                                                    self.robot.boom.getPrimaryClosedLoopTarget())
-                self.robot.smartDashboard.putNumber("Error",
-                                                    self.robot.boom.getPrimaryClosedLoopError())
-                self.robot.smartDashboard.putNumber("TimeStamp",
-                                                    self.robot.timer.get())
+                                                    self.robot.boom.talon.getActiveTrajectoryVelocity())
+                self.robot.smartDashboard.putNumber("PrimaryTarget",
+                                                    self.robot.boom.talon.getClosedLoopTarget(0))
+                self.robot.smartDashboard.putNumber("PrimaryError",
+                                                    self.robot.boom.talon.getClosedLoopError(0))
+                self.robot.smartDashboard.putNumber("TimeStamp", self.robot.timer.get())
 
     def isFinished(self):
         return self.finished
 
     def end(self):
-        self.robot.boomState = BOOM_STATE.Switch
+        endPotError = (self.robot.boom.getPotPositionInDegrees() -
+                       self.robot.boom.POT_SWITCH_POSITION_DEG)
+        if abs(endPotError) < self.robot.boom.POT_ERROR_LIMIT:
+            self.robot.boomState = BOOM_STATE.Switch
+        else:
+            self.robot.boomState = BOOM_STATE.Unknown
+            logger.warning("Boom to Switch Command finish poorly - endPotError: %3.1f" %
+                           (endPotError))
         self.robot.boom.initOpenLoop()
