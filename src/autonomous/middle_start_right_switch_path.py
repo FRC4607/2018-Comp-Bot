@@ -2,7 +2,7 @@ import math
 import os
 import pathfinder as pf
 from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, Y_WALL_TO_EXCHANGE_FAR, \
-    X_WALL_TO_SWITCH_NEAR, Y_WALL_TO_SWITCH_NEAR
+    X_WALL_TO_SWITCH_NEAR, Y_WALL_TO_SWITCH_FAR
 from utilities.functions import GeneratePath
 
 
@@ -22,7 +22,7 @@ class settings():
 # -Y is left, +headings are going from +X towards +Y, and -headings are going from +X to -Y.
 waypoints = [
     pf.Waypoint(0.5 * X_ROBOT_LENGTH,                          Y_WALL_TO_EXCHANGE_FAR + 0.5 * Y_ROBOT_WIDTH,  0),
-    pf.Waypoint(X_WALL_TO_SWITCH_NEAR - 0.5 * X_ROBOT_LENGTH,  Y_WALL_TO_SWITCH_NEAR + 1.5,                   0),
+    pf.Waypoint(X_WALL_TO_SWITCH_NEAR - 0.5 * X_ROBOT_LENGTH,  Y_WALL_TO_SWITCH_FAR - 1.5,                   0),
 ]
 
-GeneratePath(os.path.dirname(__file__), "middle_start_left_switch", waypoints, settings)
+GeneratePath(os.path.dirname(__file__), "middle_start_right_switch", waypoints, settings)

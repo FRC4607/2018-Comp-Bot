@@ -22,4 +22,4 @@ waypoints = [
     pf.Waypoint(X_WALL_TO_SWITCH_NEAR - 0.5 * X_ROBOT_LENGTH, Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH, 0),
 ]
 
-GeneratePath(os.path.dirname(__file__), "forward_path", waypoints)
+GeneratePath(os.path.dirname(__file__), "forward", waypoints, settings)

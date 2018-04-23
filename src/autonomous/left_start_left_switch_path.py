@@ -2,7 +2,7 @@ import math
 import os
 import pathfinder as pf
 from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, Y_WALL_TO_START, X_WALL_TO_SCALE_NEAR, \
-    Y_WALL_TO_SCALE_NEAR, X_WALL_TO_SWITCH_FAR
+    Y_WALL_TO_SCALE_NEAR, X_WALL_TO_SWITCH_FAR, Y_WALL_TO_SWITCH_NEAR
 from utilities.functions import GeneratePath
 
 
@@ -22,7 +22,7 @@ class settings():
 waypoints = [
     pf.Waypoint(0.5 * X_ROBOT_LENGTH,                                                                       Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH, 0),
     pf.Waypoint(X_WALL_TO_SWITCH_FAR - 0.5 * X_ROBOT_LENGTH,                                                Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH, 0),
-    pf.Waypoint(X_WALL_TO_SCALE_NEAR + math.sin(pf.d2r(20.0)) * 0.5 * Y_ROBOT_WIDTH - 0.5 * X_ROBOT_LENGTH, Y_WALL_TO_SCALE_NEAR,                  pf.d2r(20.0)),
+    pf.Waypoint(X_WALL_TO_SWITCH_FAR - 0.5 * X_ROBOT_LENGTH,                                                Y_WALL_TO_SWITCH_NEAR - 0.5 * Y_ROBOT_WIDTH, pf.d2r(90.0)),
 ]
 
-GeneratePath(os.path.dirname(__file__), "left_start_left_scale", waypoints, settings)
+GeneratePath(os.path.dirname(__file__), "left_start_left_switch", waypoints, settings)

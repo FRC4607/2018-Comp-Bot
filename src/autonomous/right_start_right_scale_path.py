@@ -2,7 +2,7 @@ import math
 import os
 import pathfinder as pf
 from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, Y_WALL_TO_START, X_WALL_TO_SCALE_NEAR, \
-    Y_WALL_TO_SCALE_NEAR, X_WALL_TO_SWITCH_FAR
+    Y_WALL_TO_SCALE_FAR, X_WALL_TO_SWITCH_FAR
 from utilities.functions import GeneratePath
 
 
@@ -20,9 +20,9 @@ class settings():
 # consistent frame of reference. This means that +X is forward, -X is backward, +Y is right, and
 # -Y is left, +headings are going from +X towards +Y, and -headings are going from +X to -Y.
 waypoints = [
-    pf.Waypoint(0.5 * X_ROBOT_LENGTH,                                                                       Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH, 0),
-    pf.Waypoint(X_WALL_TO_SWITCH_FAR - 0.5 * X_ROBOT_LENGTH,                                                Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH, 0),
-    pf.Waypoint(X_WALL_TO_SCALE_NEAR + math.sin(pf.d2r(20.0)) * 0.5 * Y_ROBOT_WIDTH - 0.5 * X_ROBOT_LENGTH, Y_WALL_TO_SCALE_NEAR,                  pf.d2r(20.0)),
+    pf.Waypoint(0.5 * X_ROBOT_LENGTH,                                                                       Y_WALL_TO_SCALE_FAR + 0.5 * Y_ROBOT_WIDTH, 0),
+    pf.Waypoint(X_WALL_TO_SWITCH_FAR - 0.5 * X_ROBOT_LENGTH,                                                Y_WALL_TO_SCALE_FAR + 0.5 * Y_ROBOT_WIDTH, 0),
+    pf.Waypoint(X_WALL_TO_SCALE_NEAR + math.sin(pf.d2r(20.0)) * 0.5 * Y_ROBOT_WIDTH - 0.5 * X_ROBOT_LENGTH, Y_WALL_TO_SCALE_FAR,                  pf.d2r(-20.0)),
 ]
 
-GeneratePath(os.path.dirname(__file__), "left_start_left_scale", waypoints, settings)
+GeneratePath(os.path.dirname(__file__), "right_start_right_scale", waypoints, settings)

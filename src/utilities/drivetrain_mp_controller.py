@@ -19,16 +19,14 @@ class DrivetrainMPController():
     """
 
     NOTIFIER_DEBUG_CNT = 100
-    MIN_NUM_POINTS = 90
+    MIN_NUM_POINTS = 5
     NUM_LOOPS_TIMEOUT = 10000
-    # SYNC_CONSTANT = 2
-    SYNC_CONSTANT = 0
+    SYNC_CONSTANT = 2
     SYNC_SIDE_LEFT = True
     MP_TYPE = WPI_TalonSRX.ControlMode.MotionProfileArc
     #  MP_TYPE = WPI_TalonSRX.ControlMode.MotionProfile
-    
 
-    def __init__(self, left_talon, left_points, right_talon, right_points,
+    def __init__(self, left_talon, left_points, right_talon, right_points, reverse,
                  profile_slot_select0, profile_slot_select1):
 
         # Reference to the motion profile to run
@@ -36,18 +34,15 @@ class DrivetrainMPController():
         self._rightPoints = right_points
         self._profileSlotSelect0 = profile_slot_select0
         self._profileSlotSelect1 = profile_slot_select1
+        self.reverse = reverse
 
         # Reference to the Talon SRX being used
         self._leftTalon = left_talon
         self._rightTalon = right_talon
 
-        # Reference used to collect the status of the named tuple data transfer object
+        # Create objects to receive the status
         self._leftStatus = MotionProfileStatus
         self._rightStatus = MotionProfileStatus
-
-        # Reference used to collect the trajectory point of the named tuple data transfer object
-        self._leftPoint = TrajectoryPoint
-        self._rightPoint = TrajectoryPoint
 
         # Control variables
         self._start = False
@@ -122,13 +117,11 @@ class DrivetrainMPController():
                 # off the notifier which moves the top buffer data into the bottom buffer.
                 else:
                     logger.info("Starting the Motion Profile Controller")
-                    self._outputStatus()
                     self._start = False
                     self._state = 1
                     self._loopTimeout = self.NUM_LOOPS_TIMEOUT
                     self._startFilling()
                     self._notifier.startPeriodic(self._streamRateMS / 1000)
-                    logger.info("Started Motion Profile Controller _notifier")
 
         # The Talon MPE has started filling the buffer.  Once enough points have been loaded into
         # the bottom buffer, enable the Talon MPE.
@@ -145,7 +138,6 @@ class DrivetrainMPController():
         # Check status of the MP and if there isn't an underrun condition, reset the loop timeout.
         # Once the last point has been processed, stop the notifier and set the Talon MPE to hold
         # the final position.
-        # ***** TODO ***** (may want to go to neutral instead)
         elif self._state == 2:
             if not self._leftStatus.isUnderrun and not self._rightStatus.isUnderrun:
                 self._loopTimeout = self.NUM_LOOPS_TIMEOUT
@@ -171,12 +163,25 @@ class DrivetrainMPController():
                                           self._rightTalon.getActiveTrajectoryPosition())
                 smart_dashboard.putNumber("RightEncVel",
                                           self._rightTalon.getAnalogInVel())
-                smart_dashboard.putNumber("ActVel",
-                                          self._talon.getActiveTrajectoryPosition())
-                smart_dashboard.putNumber("PrimaryTarget",
-                                          self._talon.getClosedLoopTarget(0))
-                smart_dashboard.putNumber("PrimaryError",
-                                          self._talon.getClosedLoopError(0))
+                smart_dashboard.putNumber("RightActVel",
+                                          self._rightTalon.getActiveTrajectoryVelocity())
+                smart_dashboard.putNumber("RightPrimaryError",
+                                          self._rightTalon.getClosedLoopError(0))
+                smart_dashboard.putNumber("RightSecondaryError",
+                                          self._rightTalon.getClosedLoopError(1))
+
+                smart_dashboard.putNumber("LeftEncPos",
+                                          self._leftTalon.getSensorCollection().getQuadraturePosition())
+                smart_dashboard.putNumber("LeftActPos",
+                                          self._leftTalon.getActiveTrajectoryPosition())
+                smart_dashboard.putNumber("LeftEncVel",
+                                          self._leftTalon.getAnalogInVel())
+                smart_dashboard.putNumber("LeftActVel",
+                                          self._leftTalon.getActiveTrajectoryVelocity())
+                smart_dashboard.putNumber("LeftPrimaryError",
+                                          self._leftTalon.getClosedLoopError(0))
+                smart_dashboard.putNumber("LeftSecondaryError",
+                                          self._leftTalon.getClosedLoopError(1))
                 smart_dashboard.putNumber("RightTopBufferCount", self._rightStatus.topBufferCnt)
                 smart_dashboard.putNumber("LeftTopBufferCount", self._leftStatus.topBufferCnt)
                 smart_dashboard.putNumber("LeftBottomBufferCount", self._leftStatus.btmBufferCnt)
@@ -240,8 +245,6 @@ class DrivetrainMPController():
         if self._leftStatus.btmBufferCnt < 100 and self._rightStatus.btmBufferCnt < 100:
             self._leftTalon.processMotionProfileBuffer()
             self._rightTalon.processMotionProfileBuffer()
-            logger.info("leftbtmBufferCnt: %i, rightbtmBufferCnt: %i," %
-                  (self._leftStatus.btmBufferCnt, self._rightStatus.btmBufferCnt))
 
     def _getTrajectoryDuration(self, duration):
         """
@@ -271,58 +274,56 @@ class DrivetrainMPController():
         """
         This method will start filling the top buffer of the Talon MPE.  This will execute quickly.
         """
+        # This will insert a few 0 points at the beginning of the profile in order to try and get
+        # both of the Talon's in sync with one another.
         for i in range(self.SYNC_CONSTANT):
             if self.SYNC_SIDE_LEFT:
-                self._leftPoint.position = 0
-                self._leftPoint.velocity = 0
-                self._leftPoint.auxiliaryPos = 0
-                self._leftPoint.profileSlotSelect0 = self._profileSlotSelect0
-                self._leftPoint.profileSlotSelect1 = self._profileSlotSelect1
-                self._leftPoint.timeDur = self._getTrajectoryDuration(self._leftPoints[0][3])
-                self._leftPoint.zeroPos = True
-                self._leftPoint.isLastPoint = False
-                self._leftTalon.pushMotionProfileTrajectory(self._leftPoint)
+                point = TrajectoryPoint(0.0,
+                                        0.0,
+                                        0.0,
+                                        self._profileSlotSelect0,
+                                        self._profileSlotSelect1,
+                                        False,
+                                        True,
+                                        self._getTrajectoryDuration(self._leftPoints[0][3]))
+                self._leftTalon.pushMotionProfileTrajectory(point)
 
+        # This will fill the top buffers of the Talons.
         for i in range(len(self._leftPoints)):
-            self._leftPoint.position = self._leftPoints[i][0]
-            self._leftPoint.velocity = self._leftPoints[i][1]
-            self._leftPoint.auxiliaryPos = self._leftPoints[i][2]
-            self._leftPoint.profileSlotSelect0 = self._profileSlotSelect0
-            self._leftPoint.profileSlotSelect1 = self._profileSlotSelect1
-            self._leftPoint.timeDur = self._getTrajectoryDuration(self._leftPoints[i][3])
-            self._leftPoint.zeroPos = False
-            if i == 0:
-                if self.SYNC_CONSTANT != 0:
-                    self._leftPoint.zeroPos = True
-            self._leftPoint.isLastPoint = False
-            if i+1 == len(self._leftPoints):
-                self._leftPoint.isLastPoint = True
-            self._leftTalon.pushMotionProfileTrajectory(self._leftPoint)
+            point = TrajectoryPoint(-self._leftPoints[i][0] if self.reverse else self._leftPoints[i][0],
+                                    -self._leftPoints[i][1] if self.reverse else self._leftPoints[i][1],
+                                    self._leftPoints[i][2],
+                                    self._profileSlotSelect0,
+                                    self._profileSlotSelect1,
+                                    True if i+1 == len(self._leftPoints) else False,
+                                    True if i == 0 and self.SYNC_CONSTANT != 0 else False,
+                                    self._getTrajectoryDuration(self._leftPoints[i][3]))
+            self._leftTalon.pushMotionProfileTrajectory(point)
+            point = TrajectoryPoint(-self._rightPoints[i][0] if self.reverse else self._rightPoints[i][0],
+                                    -self._rightPoints[i][1] if self.reverse else self._rightPoints[i][1],
+                                    self._leftPoints[i][2],
+                                    self._profileSlotSelect0,
+                                    self._profileSlotSelect1,
+                                    True if i+1 == len(self._rightPoints) else False,
+                                    True if i == 0 else False,
+                                    self._getTrajectoryDuration(self._rightPoints[i][3]))
+            self._rightTalon.pushMotionProfileTrajectory(point)
 
-            self._rightPoint.position = self._rightPoints[i][0]
-            self._rightPoint.velocity = self._rightPoints[i][1]
-            self._rightPoint.auxiliaryPos = self._rightPoints[i][2]
-            self._rightPoint.profileSlotSelect0 = self._profileSlotSelect0
-            self._rightPoint.profileSlotSelect1 = self._profileSlotSelect1
-            self._rightPoint.timeDur = self._getTrajectoryDuration(self._rightPoints[i][3])
-            self._rightPoint.zeroPos = False
-            if i == 0:
-                self._rightPoint.zeroPos = True
-            self._rightPoint.isLastPoint = False
-            if i+1 == len(self._rightPoints):
-                self._rightPoint.isLastPoint = True
-            self._rightTalon.pushMotionProfileTrajectory(self._rightPoint)
 
     def _outputStatus(self):
         logger.warning("LEFT: isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, "
-                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s, mode: %i, timeDureMS: %i" %
+                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s, "
+                       "mode: %i, timeDureMS: %i" %
                        (self._leftStatus.isUnderrun, self._leftStatus.hasUnderrun,
                         self._leftStatus.topBufferRem, self._leftStatus.topBufferCnt,
                         self._leftStatus.btmBufferCnt, self._leftStatus.activePointValid,
-                        self._leftStatus.isLast, self._leftStatus.outputEnable, self._leftStatus.timeDurMs))
+                        self._leftStatus.isLast, self._leftStatus.outputEnable,
+                        self._leftStatus.timeDurMs))
         logger.warning("RIGHT: isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, "
-                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s, mode: %i, timeDureMS: %i" %
+                       "topBufferCnt: %i, btmBufferCnt: %i, activePointValid: %s, isLast: %s, "
+                       "mode: %i, timeDureMS: %i" %
                        (self._rightStatus.isUnderrun, self._rightStatus.hasUnderrun,
                         self._rightStatus.topBufferRem, self._rightStatus.topBufferCnt,
                         self._rightStatus.btmBufferCnt, self._rightStatus.activePointValid,
-                        self._rightStatus.isLast, self._rightStatus.outputEnable, self._rightStatus.timeDurMs))
+                        self._rightStatus.isLast, self._rightStatus.outputEnable,
+                        self._rightStatus.timeDurMs))

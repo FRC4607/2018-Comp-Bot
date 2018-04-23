@@ -4,15 +4,14 @@ from wpilib.command import CommandGroup
 from utilities.drivetrain_path_follower import DrivetrainPathFollower
 
 
-class AutonForward(CommandGroup):
+class AutonRightStartRightScale(CommandGroup):
 
     def __init__(self, robot):
         super().__init__()
         self.requires(robot.driveTrain)
 
-        # Read up the pickled path file of trajectories
-        with open(os.path.join(os.path.dirname(__file__),
-                               'forward.pickle'), "rb") as fp:
+        # Read up the pickled path file
+        with open(os.path.join(os.path.dirname(__file__), 'right_start_right_scale.pickle'), "rb") as fp:
             path = pickle.load(fp)
 
         # Add commands to run

@@ -1,5 +1,7 @@
+import os
+import pickle
 from wpilib.command import CommandGroup
-from autonomous.left_start_left_scale_path_follower import LeftStartLeftScalePathFollower
+from utilities.drivetrain_path_follower import DrivetrainPathFollower
 
 
 class AutonLeftStartLeftScale(CommandGroup):
@@ -8,4 +10,10 @@ class AutonLeftStartLeftScale(CommandGroup):
         super().__init__()
         self.requires(robot.driveTrain)
 
-        self.addSequential(LeftStartLeftScalePathFollower(robot))
+        # Read up the pickled path file of trajectories
+        with open(os.path.join(os.path.dirname(__file__),
+                               'left_start_left_scale.pickle'), "rb") as fp:
+            path = pickle.load(fp)
+
+        # Add commands to run
+        self.addSequential(DrivetrainPathFollower(robot, path, False))

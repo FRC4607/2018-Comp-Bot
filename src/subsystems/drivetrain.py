@@ -63,8 +63,8 @@ class DriveTrain(Subsystem):
         self.diffDrive.setSafetyEnabled(False)
 
         # Enable brake/coast mode
-        self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Coast)
-        self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Coast)
+        self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
+        self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
 
         # This function will intiliaze the drivetrain motor controllers to the factory defaults.
         # Only values which do not match the factory default will be written.  Any values which
@@ -91,13 +91,13 @@ class DriveTrain(Subsystem):
         # evaluates to 2607.6 encoder units per foot.  For the feed-forward system, we expect very
         # tight position control, so use a P-gain which drives full throttle at 8" of error.  This
         # evaluates to 0.588 = (1.0 * 1023) / (8 / 12 * 2607.6)
-        self.leftTalon.config_kP(0, 0.0, 10)
+        self.leftTalon.config_kP(0, 1.0, 10)
         self.leftTalon.config_kI(0, 0.0, 10)
         self.leftTalon.config_kD(0, 0.0, 10)
         self.leftTalon.config_kF(0, 1023 / 12, 10)   # 10-bit ADC / 12 V
         self.leftTalon.config_IntegralZone(0, 100, 10);
         self.leftTalon.configClosedLoopPeakOutput(0, 1.0, 10)
-        self.rightTalon.config_kP(0, 0.0, 10)
+        self.rightTalon.config_kP(0, 1.0, 10)
         self.rightTalon.config_kI(0, 0.0, 10)
         self.rightTalon.config_kD(0, 0.0, 10)
         self.rightTalon.config_kF(0, 1023 / 12, 10)  # 10-bit ADC / 12 V
@@ -105,13 +105,13 @@ class DriveTrain(Subsystem):
         self.rightTalon.configClosedLoopPeakOutput(0, 1.0, 10)
 
         # PIDF slot index 1 is for autonomous heading
-        self.leftTalon.config_kP(1, 0, 10)
+        self.leftTalon.config_kP(1, 6.5, 10)
         self.leftTalon.config_kI(1, 0, 10)
         self.leftTalon.config_kD(1, 0, 10)
         self.leftTalon.config_kF(1, 0, 10)
         self.leftTalon.config_IntegralZone(1, 100, 10);
         self.leftTalon.configClosedLoopPeakOutput(1, 1.0, 10)
-        self.rightTalon.config_kP(1, 0, 10)
+        self.rightTalon.config_kP(1, 6.5, 10)
         self.rightTalon.config_kI(1, 0, 10)
         self.rightTalon.config_kD(1, 0, 10)
         self.rightTalon.config_kF(1, 0, 10)

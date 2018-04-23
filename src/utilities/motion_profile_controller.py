@@ -22,24 +22,16 @@ class MotionProfileController():
     MIN_NUM_POINTS = 5
     NUM_LOOPS_TIMEOUT = 10
 
-    def __init__(self, talon, points, reverse, starting_position,
-                 profile_slot_select0, profile_slot_select1):
+    def __init__(self, talon, points, reverse, profile_slot_select0, profile_slot_select1):
 
         # Reference to the motion profile to run
         self._points = points
         self._profileSlotSelect0 = profile_slot_select0
         self._profileSlotSelect1 = profile_slot_select1
         self.reverse = reverse
-        self.startingPostion = starting_position
 
         # Reference to the Talon SRX being used
         self._talon = talon
-
-        # Reference used to collect the status of the named tuple data transfer object
-        self._status = MotionProfileStatus
-
-        # Reference used to collect the trajectory point of the named tuple data transfer object
-        self._point = TrajectoryPoint
 
         # Control variables
         self._start = False
@@ -47,6 +39,7 @@ class MotionProfileController():
         self._finished = True
         self._loopTimeout = -1
         self._debugCnt = self.NOTIFIER_DEBUG_CNT
+        self._status = MotionProfileStatus
 
         # Create a _notifier to stream trajectory points into the talon.  If the input
         # stream_rate_ms is greater than 40ms, then it would be better to call
@@ -108,7 +101,6 @@ class MotionProfileController():
                     self._loopTimeout = self.NUM_LOOPS_TIMEOUT
                     self._startFilling()
                     self._notifier.startPeriodic(self._streamRateMS / 1000)
-                    logger.info("Started Motion Profile Controller _notifier")
 
         # The Talon MPE has started filling the buffer.  Once enough points have been loaded into
         # the bottom buffer, enable the Talon MPE.
@@ -137,7 +129,7 @@ class MotionProfileController():
                 logger.info("Called to stop Motion Profile Controller notifier")
                 self._talon.set(WPI_TalonSRX.ControlMode.MotionProfile,
                                 SetValueMotionProfile.Disable)
-            
+
         elif self._state == 3:
             self._state = 0
             self._loopTimeout -= 1
@@ -187,10 +179,6 @@ class MotionProfileController():
             self._debugCnt -= 1
         if self._status.btmBufferCnt < 100:
             self._talon.processMotionProfileBuffer()
-            #=======================================================================================
-            # logger.info("leftbtmBufferCnt: %i, rightbtmBufferCnt: %i," %
-            #       (self._leftStatus.btmBufferCnt, self._rightStatus.btmBufferCnt))
-            #=======================================================================================
 
     def _getTrajectoryDuration(self, duration):
         """
@@ -221,23 +209,15 @@ class MotionProfileController():
         This method will start filling the top buffer of the Talon MPE.  This will execute quickly.
         """
         for i in range(len(self._points)):
-            if self.reverse:
-                self._point.position = -self._points[i][0]
-                self._point.velocity = -self._points[i][1]
-            else:
-                self._point.position = self._points[i][0]
-                self._point.velocity = self._points[i][1]
-            self._point.auxiliaryPos = self._points[i][2]
-            self._point.profileSlotSelect0 = self._profileSlotSelect0
-            self._point.profileSlotSelect1 = self._profileSlotSelect1
-            self._point.timeDur = self._getTrajectoryDuration(self._points[i][3])
-            self._point.zeroPos = False
-            if i == 0:
-                self._point.zeroPos = True
-            self._point.isLastPoint = False
-            if i+1 == len(self._points):
-                self._point.isLastPoint = True
-            self._talon.pushMotionProfileTrajectory(self._point)
+            point = TrajectoryPoint(-self._points[i][0] if self.reverse else self._points[i][0],
+                                    -self._points[i][1] if self.reverse else self._points[i][1],
+                                    self._points[i][2],
+                                    self._profileSlotSelect0,
+                                    self._profileSlotSelect1,
+                                    True if i+1 == len(self._points) else False,
+                                    True if i == 0 else False,
+                                    self._getTrajectoryDuration(self._points[0][3]))
+            self._talon.pushMotionProfileTrajectory(point)
 
     def _outputStatus(self):
         logger.warning("isUnderrun: %s, hasUnderrun: %s, topBufferRem: %s, topBufferCnt: %i, "

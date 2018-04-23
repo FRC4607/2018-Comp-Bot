@@ -57,28 +57,48 @@ def GeneratePath(path_name, file_name, waypoints, settings):
     rightTrajectory = modifier.getLeftTrajectory()
     leftTrajectory = modifier.getRightTrajectory()
 
-
     # Grab the position, velocity + acceleration for feed-forward, heading, and duration
     path = {"left": [], "right": []}
+    reversePath = {"left": [], "right": []}
+    headingOut = []
     output = open(os.path.join(FILE_OUTPUT_PATH, file_name+".txt"), "w")
     output.write("x, y, dt, pos, vel, acc, heading, "
                  "L_x, L_y, L_dt, L_pos, L_vel, L_acc, L_heading, "
                  "R_x, R_y, R_dt, R_pos, R_vel, R_acc, R_heading\n")
     for i in range(len(leftTrajectory)):
+        if abs(pf.r2d(leftTrajectory[i].heading)) > 180:
+            heading = -(pf.r2d(leftTrajectory[i].heading) - 360)
+        else:
+            heading = -pf.r2d(leftTrajectory[i].heading)
+        headingOut.append(heading)
         path["left"].append([leftTrajectory[i].position * 4096 /
                              (ROBOT_WHEEL_DIAMETER_FT * math.pi),
                              CalculateFeedForwardVoltage(True,
                                                          leftTrajectory[i].velocity,
                                                          leftTrajectory[i].acceleration),
-                             pf.r2d(leftTrajectory[i].heading),
+                             heading / 360,
                              int(leftTrajectory[i].dt * 1000)])
+        reversePath["right"].append([leftTrajectory[i].position * 4096 /
+                                     (ROBOT_WHEEL_DIAMETER_FT * math.pi),
+                                     CalculateFeedForwardVoltage(False,
+                                                                 leftTrajectory[i].velocity,
+                                                                 leftTrajectory[i].acceleration),
+                                     heading / 360,
+                                     int(leftTrajectory[i].dt * 1000)])
         path["right"].append([rightTrajectory[i].position * 4096 /
                               (ROBOT_WHEEL_DIAMETER_FT * math.pi),
                               CalculateFeedForwardVoltage(False,
                                                           rightTrajectory[i].velocity,
                                                           rightTrajectory[i].acceleration),
-                              pf.r2d(rightTrajectory[i].heading),
+                              heading / 360,
                               int(rightTrajectory[i].dt * 1000)])
+        reversePath["left"].append([rightTrajectory[i].position * 4096 /
+                                    (ROBOT_WHEEL_DIAMETER_FT * math.pi),
+                                    CalculateFeedForwardVoltage(True,
+                                                                rightTrajectory[i].velocity,
+                                                                rightTrajectory[i].acceleration),
+                                    heading / 360,
+                                    int(rightTrajectory[i].dt * 1000)])
 
         # It's easier to see the path when plotting the X data as the Y-axis and the Y data as the
         # X-axis in openoffice.
@@ -99,7 +119,8 @@ def GeneratePath(path_name, file_name, waypoints, settings):
     # Dump the path into a pickle file which will be read up later by the RoboRIO robot code
     with open(os.path.join(path_name, file_name+".pickle"), "wb") as fp:
         pickle.dump(path, fp)
-
+    with open(os.path.join(path_name, file_name+"_reverse.pickle"), "wb") as fp:
+        pickle.dump(reversePath, fp)
     # Plot the data for review
     x = list(i * (settings.period) for i, _ in enumerate(leftTrajectory))
 
@@ -119,6 +140,11 @@ def GeneratePath(path_name, file_name, waypoints, settings):
     plt.gca().set_xticks(np.arange(0, 27.1, 3))
     plt.grid(which='minor', color='grey', linestyle='--', alpha=0.25)
     plt.grid(which='major', color='grey', linestyle='-', alpha=0.75)
+
+    # Plot the heading
+    plt.figure()
+    plt.title("Heading")
+    plt.plot(x, headingOut, marker='.')
 
     # Plot the velocity and acceleration and look for any discontinuities
     plt.figure()

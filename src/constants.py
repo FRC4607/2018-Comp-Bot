@@ -1,11 +1,10 @@
 import enum
 import logging
 
-
 """
 LOGGING CONSTANTS
 """
-LOGGER_LEVEL = logging.DEBUG
+LOGGER_LEVEL = logging.INFO
 
 """
 ROBOT MEASUREMENTS
@@ -103,7 +102,7 @@ TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS = 10
 """
 MISC CONSTANTS
 """
-FILE_OUTPUT_PATH = "C:\\Users\\CIS 4607\\git\\"
+FILE_OUTPUT_PATH = "C:\\Users\\ejmcc\\CIS4607\\git\\"
 
 
 class BOOM_STATE(enum.IntEnum):

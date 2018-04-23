@@ -42,7 +42,6 @@ class BoomToSwitch(Command):
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.intakeToSwitchPath,
                                                                        False,
-                                                                       startingPostion,
                                                                        0,
                                                                        0)
                 # The start method will signal the motion profile controller to start
@@ -66,7 +65,6 @@ class BoomToSwitch(Command):
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.switchToScalePath,
                                                                        True,
-                                                                       startingPostion,
                                                                        0,
                                                                        0)
                 # The start method will signal the motion profile controller to start

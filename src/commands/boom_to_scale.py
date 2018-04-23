@@ -42,7 +42,6 @@ class BoomToScale(Command):
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.intakeToScalePath,
                                                                        False,
-                                                                       startingPostion,
                                                                        1,
                                                                        0)
 
@@ -67,7 +66,6 @@ class BoomToScale(Command):
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.switchToScalePath,
                                                                        False,
-                                                                       startingPostion,
                                                                        0,
                                                                        0)
 
