@@ -38,7 +38,6 @@ class OI(object):
         btn(self.driverJoystick, 4).whileHeld(IntakeMotorsOut(robot, INTAKE_OUT_SWITCH_SLOW))
 
         # Operator commands and control
-        # Per Dylan, boom control A-intake X-switch Y- scale
         btn(self.operatorJoystick, 1).whenPressed(IntakePneumaticsOpenClose(robot))
         btn(self.operatorJoystick, 3).whenPressed(BoomToSwitch(robot))
         btn(self.operatorJoystick, 2).whenPressed(BoomToIntake(robot))

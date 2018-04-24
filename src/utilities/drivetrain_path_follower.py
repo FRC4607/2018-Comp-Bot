@@ -8,13 +8,12 @@ logger.setLevel(LOGGER_LEVEL)
 
 class DrivetrainPathFollower(Command):
     """
-    This command will call the path which will go forward. The pickle file should have been
-    created on the PC and placed into the autonomous folder to be uploaded with the robot code.
+    This command will call the path which will go forward. The pickle file should have been created on the PC and placed into the autonomous folder
+    to be uploaded with the robot code.
     """
     def __init__(self, robot, path, reverse, pid_kludge=False):
         super().__init__()
         self.requires(robot.driveTrain)
-        # self.setInterruptible(False)
 
         # Create references to the robot and the path to follow
         self.robot = robot
