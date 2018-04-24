@@ -11,7 +11,7 @@ class DrivetrainPathFollower(Command):
     This command will call the path which will go forward. The pickle file should have been
     created on the PC and placed into the autonomous folder to be uploaded with the robot code.
     """
-    def __init__(self, robot, path, reverse):
+    def __init__(self, robot, path, reverse, pid_kludge=False):
         super().__init__()
         self.requires(robot.driveTrain)
         # self.setInterruptible(False)
@@ -20,6 +20,7 @@ class DrivetrainPathFollower(Command):
         self.robot = robot
         self.path = path
         self.reverse = reverse
+        self.pidKludge = pid_kludge
 
         # Control variables
         self.finished = True
@@ -42,6 +43,8 @@ class DrivetrainPathFollower(Command):
         """
         self.finished = False
         self.robot.driveTrain.initiaizeDrivetrainMotionProfileControllers(self._streamRate)
+        if self.pidKludge:
+            self.robot.driveTrain.pidKludge()
         self.pathFollower = DrivetrainMPController(self.robot.driveTrain.leftTalon,
                                                    self.path['left'],
                                                    self.robot.driveTrain.rightTalon,

@@ -1,19 +1,16 @@
-import math
 import os
 import pathfinder as pf
-from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, Y_WALL_TO_EXCHANGE_FAR, \
-    X_WALL_TO_SWITCH_NEAR, Y_WALL_TO_SWITCH_NEAR
+from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, X_WALL_TO_SWITCH_NEAR, Y_WALL_TO_START
 from utilities.functions import GeneratePath
 
 
 class settings():
     order = pf.FIT_HERMITE_QUINTIC
     samples = 1000000
-    period = 0.01
+    period = 0.02
     maxVelocity = 5.0
     maxAcceleration = 10
-    maxJerk = 30
-
+    maxJerk = 15
 
 # The waypoints are entered as X, Y, and Theta. Theta is measured clockwise from the X-axis and
 # is in units of radians. It is important to generate the paths in a consistent manner to those
@@ -22,7 +19,7 @@ class settings():
 # -Y is left, +headings are going from +X towards +Y, and -headings are going from +X to -Y.
 waypoints = [
     pf.Waypoint(0, 0, 0),
-    pf.Waypoint(100 / 12, -48 / 12, 0),
+    pf.Waypoint(58 / 12, -5 / 12, 0),
 ]
 
-GeneratePath(os.path.dirname(__file__), "middle_start_left_switch", waypoints, settings)
+GeneratePath(os.path.dirname(__file__), "first_cube_middle_start", waypoints, settings)

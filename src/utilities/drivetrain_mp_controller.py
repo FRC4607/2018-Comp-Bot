@@ -276,27 +276,27 @@ class DrivetrainMPController():
         """
         # This will insert a few 0 points at the beginning of the profile in order to try and get
         # both of the Talon's in sync with one another.
+
+        # This will fill the top buffers of the Talons.
         for i in range(self.SYNC_CONSTANT):
             if self.SYNC_SIDE_LEFT:
                 point = TrajectoryPoint(0.0,
                                         0.0,
-                                        0.0,
+                                        self._leftPoints[i][2],
                                         self._profileSlotSelect0,
                                         self._profileSlotSelect1,
                                         False,
-                                        True,
+                                        False if i == 0 else True,
                                         self._getTrajectoryDuration(self._leftPoints[0][3]))
                 self._leftTalon.pushMotionProfileTrajectory(point)
-
-        # This will fill the top buffers of the Talons.
         for i in range(len(self._leftPoints)):
             point = TrajectoryPoint(-self._leftPoints[i][0] if self.reverse else self._leftPoints[i][0],
                                     -self._leftPoints[i][1] if self.reverse else self._leftPoints[i][1],
                                     self._leftPoints[i][2],
                                     self._profileSlotSelect0,
                                     self._profileSlotSelect1,
-                                    True if i+1 == len(self._leftPoints) else False,
-                                    True if i == 0 and self.SYNC_CONSTANT != 0 else False,
+                                    True if i+1 == len(self._leftPoints) else False, # Last point
+                                    True if i == 0 and self.SYNC_CONSTANT == 0 else False, # zero
                                     self._getTrajectoryDuration(self._leftPoints[i][3]))
             self._leftTalon.pushMotionProfileTrajectory(point)
             point = TrajectoryPoint(-self._rightPoints[i][0] if self.reverse else self._rightPoints[i][0],

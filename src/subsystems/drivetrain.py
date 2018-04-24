@@ -44,12 +44,12 @@ class DriveTrain(Subsystem):
         self.rightDrive = SpeedControllerGroup(self.frontRight, self.rightTalon)
         self.diffDrive = DifferentialDrive(self.leftDrive, self.rightDrive)
 
-        # Setup the default motor controller setup
-        self.initControllerSetup()
-
         # Map the pigeon.  This will be connected to an unused Talon.
         self.talonPigeon = WPI_TalonSRX(DRIVETRAIN_PIGEON)
         self.pigeonIMU = PigeonIMU(self.talonPigeon)
+
+        # Setup the default motor controller setup
+        self.initControllerSetup()
 
     def initControllerSetup(self):
         """
@@ -65,6 +65,9 @@ class DriveTrain(Subsystem):
         # Enable brake/coast mode
         self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
         self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
+
+        self.initPigeonIMU()
+        self.initQuadratureEncoder()
 
         # This function will intiliaze the drivetrain motor controllers to the factory defaults.
         # Only values which do not match the factory default will be written.  Any values which
@@ -91,40 +94,33 @@ class DriveTrain(Subsystem):
         # evaluates to 2607.6 encoder units per foot.  For the feed-forward system, we expect very
         # tight position control, so use a P-gain which drives full throttle at 8" of error.  This
         # evaluates to 0.588 = (1.0 * 1023) / (8 / 12 * 2607.6)
-        self.leftTalon.config_kP(0, 1.0, 10)
+        self.leftTalon.config_kP(0, 0.8, 10)
         self.leftTalon.config_kI(0, 0.0, 10)
         self.leftTalon.config_kD(0, 0.0, 10)
         self.leftTalon.config_kF(0, 1023 / 12, 10)   # 10-bit ADC / 12 V
-        self.leftTalon.config_IntegralZone(0, 100, 10);
-        self.leftTalon.configClosedLoopPeakOutput(0, 1.0, 10)
-        self.rightTalon.config_kP(0, 1.0, 10)
+        self.rightTalon.config_kP(0, 0.8, 10)
         self.rightTalon.config_kI(0, 0.0, 10)
         self.rightTalon.config_kD(0, 0.0, 10)
         self.rightTalon.config_kF(0, 1023 / 12, 10)  # 10-bit ADC / 12 V
-        self.rightTalon.config_IntegralZone(0, 100, 10);
-        self.rightTalon.configClosedLoopPeakOutput(0, 1.0, 10)
 
         # PIDF slot index 1 is for autonomous heading
-        self.leftTalon.config_kP(1, 6.5, 10)
+        self.leftTalon.config_kP(1, 1.0, 10)
         self.leftTalon.config_kI(1, 0, 10)
         self.leftTalon.config_kD(1, 0, 10)
         self.leftTalon.config_kF(1, 0, 10)
-        self.leftTalon.config_IntegralZone(1, 100, 10);
-        self.leftTalon.configClosedLoopPeakOutput(1, 1.0, 10)
-        self.rightTalon.config_kP(1, 6.5, 10)
+        self.rightTalon.config_kP(1, 1.0, 10)
         self.rightTalon.config_kI(1, 0, 10)
         self.rightTalon.config_kD(1, 0, 10)
         self.rightTalon.config_kF(1, 0, 10)
-        self.rightTalon.config_IntegralZone(1, 100, 10);
-        self.rightTalon.configClosedLoopPeakOutput(1, 1.0, 10)
 
         # Change the control frame period
         self.leftTalon.changeMotionControlFramePeriod(stream_rate)
         self.rightTalon.changeMotionControlFramePeriod(stream_rate)
 
-        # Initilaize the quadrature encoders and pigeon IMU
-        self.initQuadratureEncoder()
-        self.initPigeonIMU()
+    def pidKludge(self):
+        self.leftTalon.config_kP(0, 0.01, 10)
+        self.rightTalon.config_kP(0, 0.01, 10)
+
 
     def cleanUpDrivetrainMotionProfileControllers(self):
         '''
@@ -140,10 +136,13 @@ class DriveTrain(Subsystem):
         self.rightTalon.changeMotionControlFramePeriod(framePeriod)
 
     def initPigeonIMU(self):
-        # false means talon's local output is PID0 + PID1, and other side Talon is PID0 - PID1
-        # true means talon's local output is PID0 - PID1, and other side Talon is PID0 + PID1
-        self.rightTalon.configAuxPIDPolarity(False, 10)
-        self.leftTalon.configAuxPIDPolarity(True, 10)
+        # Set PID AUX polarity
+        self.rightTalon.configAuxPIDPolarity(True, 10)
+        self.leftTalon.configAuxPIDPolarity(False, 10)
+        #==========================================================================================
+        # self.rightTalon.configAuxPIDPolarity(False, 10)
+        # self.leftTalon.configAuxPIDPolarity(True, 10)
+        #==========================================================================================
 
         # select a gadgeteer pigeon for remote 0
         self.rightTalon.configRemoteFeedbackFilter(self.talonPigeon.getDeviceID(),
@@ -162,6 +161,7 @@ class DriveTrain(Subsystem):
         self.rightTalon.configSelectedFeedbackCoefficient(3600 / 8192, 1, 10)
         self.leftTalon.configSelectedFeedbackCoefficient(3600 / 8192, 1, 10)
 
+    def zeroGyro(self):
         # Zero the sensor
         self.pigeonIMU.setYaw(0, 10)
         self.pigeonIMU.setAccumZAngle(0, 10)
@@ -174,8 +174,14 @@ class DriveTrain(Subsystem):
                                                     0, 10)
         self.rightTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.CTRE_MagEncoder_Relative,
                                                      0, 10)
+
+    def zeroQuadratureEncoder(self):
         self.leftTalon.getSensorCollection().setQuadraturePosition(0, 10)
         self.rightTalon.getSensorCollection().setQuadraturePosition(0, 10)
+
+    def seedQuadratureEncoder(self, seedValue):
+        self.leftTalon.getSensorCollection().setQuadraturePosition(seedValue, 10)
+        self.rightTalon.getSensorCollection().setQuadraturePosition(seedValue, 10)
 
     def getLeftQuadraturePosition(self):
         """

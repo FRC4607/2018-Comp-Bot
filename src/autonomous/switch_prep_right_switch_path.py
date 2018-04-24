@@ -7,11 +7,11 @@ from utilities.functions import GeneratePath
 
 
 class settings():
-    order = pf.FIT_HERMITE_QUINTIC
+    order = pf.FIT_HERMITE_CUBIC
     samples = 1000000
     period = 0.01
     maxVelocity = 5.0
-    maxAcceleration = 10
+    maxAcceleration = 8
     maxJerk = 30
 
 
@@ -21,8 +21,8 @@ class settings():
 # consistent frame of reference. This means that +X is forward, -X is backward, +Y is right, and
 # -Y is left, +headings are going from +X towards +Y, and -headings are going from +X to -Y.
 waypoints = [
-    pf.Waypoint(0, 0, 0),
-    pf.Waypoint(100 / 12, -48 / 12, 0),
+    pf.Waypoint(0, 0, pf.d2r(-45.0)),
+    pf.Waypoint(78 / 12, -16 / 12, 0),
 ]
 
-GeneratePath(os.path.dirname(__file__), "middle_start_left_switch", waypoints, settings)
+GeneratePath(os.path.dirname(__file__), "switch_prep_right_switch", waypoints, settings, False)

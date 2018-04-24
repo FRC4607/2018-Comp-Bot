@@ -35,7 +35,8 @@ def CalculateFeedForwardVoltage(leftSide, velocity, acceleration):
     return kV * velocity + kA * acceleration + VIntercept
 
 
-def GeneratePath(path_name, file_name, waypoints, settings):
+def GeneratePath(path_name, file_name, waypoints, settings, reverse=False,
+                 heading_overide = False, headingValue = 0.0):
     """
     This function will take a set of pathfinder waypoints and create the trajectories to follow
     a path going through the waypoints.  This path is specific for the drivetrain controllers,
@@ -66,10 +67,19 @@ def GeneratePath(path_name, file_name, waypoints, settings):
                  "L_x, L_y, L_dt, L_pos, L_vel, L_acc, L_heading, "
                  "R_x, R_y, R_dt, R_pos, R_vel, R_acc, R_heading\n")
     for i in range(len(leftTrajectory)):
-        if abs(pf.r2d(leftTrajectory[i].heading)) > 180:
-            heading = -(pf.r2d(leftTrajectory[i].heading) - 360)
+        if not reverse:
+            if heading_overide:
+                heading = headingValue
+            elif abs(pf.r2d(leftTrajectory[i].heading)) > 180:
+                heading = -(pf.r2d(leftTrajectory[i].heading) - 360)
+            else:
+                heading = -pf.r2d(leftTrajectory[i].heading)
         else:
-            heading = -pf.r2d(leftTrajectory[i].heading)
+            if heading_overide:
+                heading = headingValue
+            else:
+                heading = pf.r2d(leftTrajectory[i].heading) - 180
+
         headingOut.append(heading)
         path["left"].append([leftTrajectory[i].position * 4096 /
                              (ROBOT_WHEEL_DIAMETER_FT * math.pi),

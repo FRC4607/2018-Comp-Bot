@@ -10,7 +10,7 @@ class settings():
     order = pf.FIT_HERMITE_QUINTIC
     samples = 1000000
     period = 0.01
-    maxVelocity = 5.0
+    maxVelocity = 7.0
     maxAcceleration = 10
     maxJerk = 30
 
@@ -22,7 +22,7 @@ class settings():
 # -Y is left, +headings are going from +X towards +Y, and -headings are going from +X to -Y.
 waypoints = [
     pf.Waypoint(0, 0, 0),
-    pf.Waypoint(100 / 12, -48 / 12, 0),
+    pf.Waypoint(50 / 12, 0, 0),
 ]
 
-GeneratePath(os.path.dirname(__file__), "middle_start_left_switch", waypoints, settings)
+GeneratePath(os.path.dirname(__file__), "right_cube_retrieval_cube_get", waypoints, settings, False, True, 45.0)

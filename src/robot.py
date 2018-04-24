@@ -37,6 +37,10 @@ class Pitchfork(TimedRobot):
 
         # Create the smartdashboard object
         self.smartDashboard = SmartDashboard()
+        #==========================================================================================
+        # if LOGGER_LEVEL == logging.DEBUG:
+        #     self.smartDashboard.
+        #==========================================================================================
 
         # Create the sendable choosers to get the autonomous preferences
         self.positionChooser = SendableChooser()
@@ -48,7 +52,7 @@ class Pitchfork(TimedRobot):
         self.chooserOptions = {"Left": {'command': AutonLeftStartLeftScale,
                                         'chooser_text': 'Start Left'
                                         },
-                                "Middle": {'command': AutonMiddleStartRightSwitch,
+                                "Middle": {'command': AutonMiddleStartLeftSwitch,
                                            'chooser_text': 'Start Middle'
                                            },
                                 "Right": {'command': AutonForward,
