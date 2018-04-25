@@ -21,8 +21,8 @@ class settings():
 # consistent frame of reference. This means that +X is forward, -X is backward, +Y is right, and
 # -Y is left, +headings are going from +X towards +Y, and -headings are going from +X to -Y.
 waypoints = [
-    pf.Waypoint(0, 0, pf.d2r(-45.0)),
-    pf.Waypoint(78 / 12, -16 / 12, 0),
+    pf.Waypoint(0, 0, 0),
+    pf.Waypoint(48 / 12, 0, 0),
 ]
 
 GeneratePath(os.path.dirname(__file__), "switch_prep_right_switch", waypoints, settings, False)

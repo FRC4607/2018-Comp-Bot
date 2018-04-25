@@ -20,19 +20,15 @@ class AutonMiddleStartLeftSwitch(CommandGroup):
         with open(os.path.join(os.path.dirname(__file__),
                                'middle_start_left_switch.pickle'), "rb") as fp:
             path = pickle.load(fp)
-
         with open(os.path.join(os.path.dirname(__file__),
                                'left_switch_cube_retrieval.pickle'), "rb") as fp:
             cubePosPath = pickle.load(fp)
-
         with open(os.path.join(os.path.dirname(__file__),
                                'left_cube_retrieval_cube_get.pickle'), "rb") as fp:
             cubeGetPath = pickle.load(fp)
-
         with open(os.path.join(os.path.dirname(__file__),
                                'left_cube_get_switch_prep.pickle'), "rb") as fp:
             cubeSwitchPrepPath = pickle.load(fp)
-
         with open(os.path.join(os.path.dirname(__file__),
                                'switch_prep_left_switch.pickle'), "rb") as fp:
             cubeSwitchPath = pickle.load(fp)

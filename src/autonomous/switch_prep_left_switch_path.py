@@ -22,7 +22,7 @@ class settings():
 # -Y is left, +headings are going from +X towards +Y, and -headings are going from +X to -Y.
 waypoints = [
     pf.Waypoint(0, 0, 0),
-    pf.Waypoint(78 / 12, 16 / 12, pf.d2r(-45.0)),
+    pf.Waypoint(48 / 12, 0, 0),
 ]
 
 GeneratePath(os.path.dirname(__file__), "switch_prep_left_switch", waypoints, settings, False)
