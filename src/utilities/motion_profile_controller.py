@@ -180,7 +180,8 @@ class MotionProfileController():
 
     def _startFilling(self):
         """
-        This method will start filling the top buffer of the Talon MPE.  This will execute quickly.
+        This method will start filling the top buffer of the Talon MPE.  This will execute quickly.  The closed loop postion values will be zero'd
+        out at the beginning of each path.
         """
         for i in range(len(self._points)):
             point = TrajectoryPoint(-self._points[i][0] if self.reverse else self._points[i][0],

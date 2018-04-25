@@ -2,6 +2,7 @@ import os
 import pickle
 from wpilib.command import CommandGroup
 from utilities.drivetrain_path_follower import DrivetrainPathFollower
+from commands.shoot_cube_into_scale import ShootCubeIntoScale
 
 
 class AutonRightStartRightScale(CommandGroup):
@@ -16,3 +17,4 @@ class AutonRightStartRightScale(CommandGroup):
 
         # Add commands to run
         self.addSequential(DrivetrainPathFollower(robot, path, False))
+        self.addParallel(ShootCubeIntoScale(robot))

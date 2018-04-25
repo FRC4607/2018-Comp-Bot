@@ -61,5 +61,5 @@ class AutonMiddleStartLeftSwitch(CommandGroup):
         self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPrepPath, True))
 
         # Go to switch
-        self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPath, False, True))
-        self.addSequential(ShootCubeIntoSwitch(robot))
+        # self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPath, False, True))
+        # self.addSequential(ShootCubeIntoSwitch(robot))

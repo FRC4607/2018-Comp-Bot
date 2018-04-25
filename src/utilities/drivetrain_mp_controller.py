@@ -209,7 +209,8 @@ class DrivetrainMPController():
     def _startFilling(self):
         """
         This method will start filling the top buffer of the Talon MPE.  This will execute quickly.  If the motion profile is meant to have the robot
-        drive backwards, then use negative postion target and negative velocity/FF
+        drive backwards, then use negative postion target and negative velocity/FF.  The closed loop postion values will be zero'd out at the
+        beginning of each path.  This does not include the zero'ing of the gyro.
         """
         for i in range(len(self._leftPoints)):
             point = TrajectoryPoint(-self._leftPoints[i][0] if self.reverse else self._leftPoints[i][0],    # Position

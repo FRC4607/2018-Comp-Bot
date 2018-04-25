@@ -9,6 +9,9 @@ from subsystems.boom import Boom
 from oi import OI
 from autonomous.auton_forward import AutonForward
 from autonomous.auton_left_start_left_scale import AutonLeftStartLeftScale
+from autonomous.auton_right_start_right_scale import AutonRightStartRightScale
+from autonomous.auton_left_start_left_switch import AutonLeftStartLeftSwitch
+from autonomous.auton_right_start_right_switch import AutonRightStartRightSwitch
 from autonomous.auton_middle_start_left_switch import AutonMiddleStartLeftSwitch
 from autonomous.auton_middle_start_right_switch import AutonMiddleStartRightSwitch
 from constants import BOOM_STATE, LOGGER_LEVEL
@@ -45,14 +48,27 @@ class Pitchfork(TimedRobot):
         self.startPositionChooser.addDefault("Start Middle", 'Middle')
         self.smartDashboard.putData("Starting Position", self.startPositionChooser)
 
-        self.chooserOptions = {"Left": {"R": {'command': AutonForward},
-                                        "L": {'command': AutonForward},
+        # Build up the autonomous dictionary.  Fist key is the starting postion.  The second key is the switch.  The third key is the scale.
+        self.chooserOptions = {"Left": {"R": {"R": {'command': AutonForward},
+                                              "L": {'command': AutonLeftStartLeftScale},
+                                              },
+                                        "L": {"R": {'command': AutonLeftStartLeftSwitch},
+                                              "L": {'command': AutonLeftStartLeftSwitch},
+                                              },
                                         },
-                               "Middle": {"L": {"command": AutonMiddleStartLeftSwitch},
-                                          "R": {"command": AutonMiddleStartRightSwitch},
+                               "Middle": {"R": {"R": {'command': AutonMiddleStartRightSwitch},
+                                                "L": {'command': AutonMiddleStartRightSwitch},
+                                                },
+                                          "L": {"R": {'command': AutonMiddleStartLeftSwitch},
+                                                "L": {'command': AutonMiddleStartLeftSwitch},
+                                                },
                                           },
-                               "Right": {"R": {'command': AutonForward},
-                                         "L": {'command': AutonForward},
+                               "Right": {"R": {"R": {'command': AutonRightStartRightSwitch},
+                                               "L": {'command': AutonRightStartRightSwitch},
+                                               },
+                                         "L": {"R": {'command': AutonRightStartRightScale},
+                                               "L": {'command': AutonForward},
+                                               },
                                          },
                                }
 
@@ -103,8 +119,8 @@ class Pitchfork(TimedRobot):
         logger.info("Game Data: %s" % (self.gameData))
         logger.info("Starting Position %s" % (self.startingPosition))
 
-        self.autonCommand = self.chooserOptions[self.startingPosition][self.gameData[0]]['command'](self)
-        self.autonCommand.start()
+        # self.autonCommand = self.chooserOptions[self.startingPosition][self.gameData[0]][self.gameData[1]]['command'](self)
+        # self.autonCommand.start()
 
     def autonomousPeriodic(self):
         """

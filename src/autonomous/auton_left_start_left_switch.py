@@ -11,8 +11,7 @@ class AutonLeftStartLeftSwitch(CommandGroup):
         self.requires(robot.driveTrain)
 
         # Read up the pickled path file of trajectories
-        with open(os.path.join(os.path.dirname(__file__),
-                               'left_start_left_switch.pickle'), "rb") as fp:
+        with open(os.path.join(os.path.dirname(__file__), 'left_start_left_switch.pickle'), "rb") as fp:
             path = pickle.load(fp)
 
         # Add commands to run
