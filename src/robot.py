@@ -37,28 +37,24 @@ class Pitchfork(TimedRobot):
 
         # Create the smartdashboard object
         self.smartDashboard = SmartDashboard()
-        #==========================================================================================
-        # if LOGGER_LEVEL == logging.DEBUG:
-        #     self.smartDashboard.
-        #==========================================================================================
 
         # Create the sendable choosers to get the autonomous preferences
-        self.positionChooser = SendableChooser()
-        self.positionChooser.addObject("Start Left", 'Left')
-        self.positionChooser.addObject("Start Right", 'Right')
-        self.positionChooser.addDefault("Start Middle", 'Middle')
-        self.smartDashboard.putData("Starting Position", self.positionChooser)
+        self.startPositionChooser = SendableChooser()
+        self.startPositionChooser.addObject("Start Left", 'Left')
+        self.startPositionChooser.addObject("Start Right", 'Right')
+        self.startPositionChooser.addDefault("Start Middle", 'Middle')
+        self.smartDashboard.putData("Starting Position", self.startPositionChooser)
 
-        self.chooserOptions = {"Left": {'command': AutonLeftStartLeftScale,
-                                        'chooser_text': 'Start Left'
+        self.chooserOptions = {"Left": {"R": {'command': AutonForward},
+                                        "L": {'command': AutonForward},
                                         },
-                                "Middle": {'command': AutonMiddleStartLeftSwitch,
-                                           'chooser_text': 'Start Middle'
-                                           },
-                                "Right": {'command': AutonForward,
-                                          'chooser_text': 'Start Right'
+                               "Middle": {"L": {"command": AutonMiddleStartLeftSwitch},
+                                          "R": {"command": AutonMiddleStartRightSwitch},
                                           },
-                                }
+                               "Right": {"R": {'command': AutonForward},
+                                         "L": {'command': AutonForward},
+                                         },
+                               }
 
         # Create a timer for data logging
         self.timer = Timer()
@@ -97,20 +93,17 @@ class Pitchfork(TimedRobot):
         if not self.timer.running:
             self.timer.start()
 
-        # Get the prioritized scoring element, robot starting posion, and the alliance
-        # scale/switch data.
-        self.startingPosition = self.positionChooser.getSelected()
-
-        self.gameData = DriverStation.getInstance().getGameSpecificMessage()
-
         # The game specific data will be a 3-character string representing where the teams switch,
         # scale, switch are located.  For example, "LRR" means your teams closest switch is on the
         # left (as you look out onto the field from the drivers station).  The teams scale is on
         # the right, and the switch furthest away is also on the right.
+        self.startingPosition = self.startPositionChooser.getSelected()
+        self.gameData = DriverStation.getInstance().getGameSpecificMessage()
+
         logger.info("Game Data: %s" % (self.gameData))
         logger.info("Starting Position %s" % (self.startingPosition))
 
-        self.autonCommand = self.chooserOptions[self.startingPosition]['command'](self)
+        self.autonCommand = self.chooserOptions[self.startingPosition][self.gameData[0]]['command'](self)
         self.autonCommand.start()
 
     def autonomousPeriodic(self):
