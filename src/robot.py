@@ -42,32 +42,61 @@ class Pitchfork(TimedRobot):
         self.smartDashboard = SmartDashboard()
 
         # Create the sendable choosers to get the autonomous preferences
-        self.startPositionChooser = SendableChooser()
-        self.startPositionChooser.addObject("Start Left", 'Left')
-        self.startPositionChooser.addObject("Start Right", 'Right')
-        self.startPositionChooser.addDefault("Start Middle", 'Middle')
-        self.smartDashboard.putData("Starting Position", self.startPositionChooser)
+        self.startSpotChooser = SendableChooser()
+        self.startSpotChooser.addObject("Start Left", 'Left')
+        self.startSpotChooser.addObject("Start Right", 'Right')
+        self.startSpotChooser.addDefault("Start Middle", 'Middle')
+        self.smartDashboard.putData("Starting Spot", self.startSpotChooser)
 
-        # Build up the autonomous dictionary.  Fist key is the starting postion.  The second key is the switch.  The third key is the scale.
-        self.chooserOptions = {"Left": {"R": {"R": {'command': AutonForward},
-                                              "L": {'command': AutonLeftStartLeftScale},
+        self.scaleDisableChooser = SendableChooser()        
+        self.scaleDisableChooser.addObject("Enable Scale", 'Scale')
+        self.scaleDisableChooser.addDefault("Disable Scale", 'No Scale')
+        self.smartDashboard.putData("Scale Enable", self.scaleDisableChooser)
+
+        # Build up the autonomous dictionary.  Fist key is the starting position.  The second key is the switch.  The third key is the scale.
+        self.chooserOptions = {"Left": {"R": {"R": {"No Scale": {'command': AutonForward},
+                                                    "Scale": {'command': AutonForward}
+                                                    },
+                                              "L": {"No Scale": {'command': AutonForward},
+                                                    "Scale": {'command': AutonLeftStartLeftScale}
+                                                    },
                                               },
-                                        "L": {"R": {'command': AutonLeftStartLeftSwitch},
-                                              "L": {'command': AutonLeftStartLeftSwitch},
+                                        "L": {"R": {"No Scale": {'command': AutonLeftStartLeftSwitch},
+                                                    "Scale": {'command': AutonLeftStartLeftSwitch}
+                                                    },
+                                              "L": {"No Scale": {'command': AutonLeftStartLeftSwitch},
+                                                    "Scale": {'command': AutonLeftStartLeftSwitch}
+                                                    },
                                               },
                                         },
-                               "Middle": {"R": {"R": {'command': AutonMiddleStartRightSwitch},
-                                                "L": {'command': AutonMiddleStartRightSwitch},
+                               "Middle": {"R": {"R": {"No Scale": {'command': AutonMiddleStartRightSwitch},
+                                                      "Scale": {'command': AutonMiddleStartRightSwitch}
+                                                      },
+                                                "L": {"No Scale": {'command': AutonMiddleStartRightSwitch},
+                                                      "Scale": {'command': AutonMiddleStartRightSwitch}
+                                                      },
                                                 },
-                                          "L": {"R": {'command': AutonMiddleStartLeftSwitch},
-                                                "L": {'command': AutonMiddleStartLeftSwitch},
+                                          "L": {"R": {"No Scale": {'command': AutonMiddleStartLeftSwitch},
+                                                      "Scale": {'command': AutonMiddleStartLeftSwitch}
+                                                      },
+                                                "L": {"No Scale": {'command': AutonMiddleStartLeftSwitch},
+                                                      "Scale": {'command': AutonMiddleStartLeftSwitch}
+                                                      },
                                                 },
                                           },
-                               "Right": {"R": {"R": {'command': AutonRightStartRightSwitch},
-                                               "L": {'command': AutonRightStartRightSwitch},
+                               "Right": {"R": {"R": {"No Scale": {'command': AutonRightStartRightSwitch},
+                                                     "Scale": {'command': AutonRightStartRightSwitch}
+                                                     },
+                                               "L": {"No Scale": {'command': AutonRightStartRightSwitch},
+                                                     "Scale": {'command': AutonRightStartRightSwitch}
+                                                     },
                                                },
-                                         "L": {"R": {'command': AutonRightStartRightScale},
-                                               "L": {'command': AutonForward},
+                                         "L": {"R": {"No Scale": {'command': AutonForward}, 
+                                                     "Scale": {AutonRightStartRightScale}
+                                                     },
+                                               "L": {"No Scale": {'command': AutonForward},
+                                                     "Scale": {'command': AutonForward}
+                                                     },
                                                },
                                          },
                                }
@@ -81,17 +110,19 @@ class Pitchfork(TimedRobot):
         # Boom state start at the scale
         self.boomState = BOOM_STATE.Scale
 
-        if LOGGER_LEVEL == logging.INFO:
-            self.smartDashboard.putNumber("rVelocity",
-                                          self.driveTrain.getRightVelocity())
-            self.smartDashboard.putNumber("lVelocity",
-                                          self.driveTrain.getLeftVelocity())
-            self.smartDashboard.putNumber("rVoltage",
-                                          self.driveTrain.getRightVoltage())
-            self.smartDashboard.putNumber("lVoltage",
-                                          self.driveTrain.getLeftVoltage())
-            self.smartDashboard.putNumber("TimeStamp",
-                                          self.timer.get())
+        #===========================================================================================
+        # if LOGGER_LEVEL == logging.INFO:
+        #     self.smartDashboard.putNumber("rVelocity",
+        #                                   self.driveTrain.getRightVelocity())
+        #     self.smartDashboard.putNumber("lVelocity",
+        #                                   self.driveTrain.getLeftVelocity())
+        #     self.smartDashboard.putNumber("rVoltage",
+        #                                   self.driveTrain.getRightVoltage())
+        #     self.smartDashboard.putNumber("lVoltage",
+        #                                   self.driveTrain.getLeftVoltage())
+        #     self.smartDashboard.putNumber("TimeStamp",
+        #                                   self.timer.get())
+        #===========================================================================================
 
     def disabledInit(self):
         """
@@ -125,13 +156,15 @@ class Pitchfork(TimedRobot):
         # scale, switch are located.  For example, "LRR" means your teams closest switch is on the
         # left (as you look out onto the field from the drivers station).  The teams scale is on
         # the right, and the switch furthest away is also on the right.
-        self.startingPosition = self.startPositionChooser.getSelected()
+        self.startingPosition = self.startSpotChooser.getSelected()
+        self.scaleDisable = self.scaleDisableChooser.getSelected()
         self.gameData = DriverStation.getInstance().getGameSpecificMessage()
 
         logger.info("Game Data: %s" % (self.gameData))
         logger.info("Starting Position %s" % (self.startingPosition))
-
-        self.autonCommand = self.chooserOptions[self.startingPosition][self.gameData[0]][self.gameData[1]]['command'](self)
+        logger.info("Scale Enable %s" % (self.scaleDisable))
+        
+        self.autonCommand = self.chooserOptions[self.startingPosition][self.gameData[0]][self.gameData[1]][self.scaleDisable]['command'](self)
         self.autonCommand.start()
 
     def autonomousPeriodic(self):

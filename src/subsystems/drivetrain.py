@@ -86,11 +86,11 @@ class DriveTrain(Subsystem):
         self.rightTalon.config_kF(0, 1023 / 12, 10)  # 10-bit ADC units / 12 V
 
         # PIDF slot index 1 is for autonomous heading postion
-        self.leftTalon.config_kP(1, 1.0, 10)
+        self.leftTalon.config_kP(1, 5.0, 10)
         self.leftTalon.config_kI(1, 0, 10)
         self.leftTalon.config_kD(1, 0, 10)
         self.leftTalon.config_kF(1, 0, 10)
-        self.rightTalon.config_kP(1, 1.0, 10)
+        self.rightTalon.config_kP(1, 5.0, 10)
         self.rightTalon.config_kI(1, 0, 10)
         self.rightTalon.config_kD(1, 0, 10)
         self.rightTalon.config_kF(1, 0, 10)

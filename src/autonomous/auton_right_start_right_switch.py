@@ -1,6 +1,8 @@
 import os
 import pickle
 from wpilib.command import CommandGroup
+from commands.shoot_cube_into_switch import ShootCubeIntoSwitch
+from commands.boom_to_switch import BoomToSwitch
 from utilities.drivetrain_path_follower import DrivetrainPathFollower
 
 
@@ -16,3 +18,5 @@ class AutonRightStartRightSwitch(CommandGroup):
 
         # Add commands to run
         self.addSequential(DrivetrainPathFollower(robot, path, False))
+        self.addSequential(DrivetrainPathFollower(robot, path, False))
+        self.addSequential(ShootCubeIntoSwitch(robot))

@@ -148,6 +148,7 @@ class DrivetrainMPController():
 
         # In this state, we are ready to exit the motion profile.  Mark the command as complete and remove the notifier.
         elif self._state == 3:
+            logger.info("Stopping the Motion Profile Controller")
             self._finished = True
 
             # Call the free method on the notifier to hopefully stop/destroy it.  Dereference the notifier object...not sure if the garbage collector
