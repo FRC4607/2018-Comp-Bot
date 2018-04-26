@@ -81,6 +81,18 @@ class Pitchfork(TimedRobot):
         # Boom state start at the scale
         self.boomState = BOOM_STATE.Scale
 
+        if LOGGER_LEVEL == logging.INFO:
+            self.smartDashboard.putNumber("rVelocity",
+                                          self.driveTrain.getRightVelocity())
+            self.smartDashboard.putNumber("lVelocity",
+                                          self.driveTrain.getLeftVelocity())
+            self.smartDashboard.putNumber("rVoltage",
+                                          self.driveTrain.getRightVoltage())
+            self.smartDashboard.putNumber("lVoltage",
+                                          self.driveTrain.getLeftVoltage())
+            self.smartDashboard.putNumber("TimeStamp",
+                                          self.timer.get())
+
     def disabledInit(self):
         """
         Initialization code for disabled mode should go here.  This method will be called each
@@ -119,8 +131,8 @@ class Pitchfork(TimedRobot):
         logger.info("Game Data: %s" % (self.gameData))
         logger.info("Starting Position %s" % (self.startingPosition))
 
-        # self.autonCommand = self.chooserOptions[self.startingPosition][self.gameData[0]][self.gameData[1]]['command'](self)
-        # self.autonCommand.start()
+        self.autonCommand = self.chooserOptions[self.startingPosition][self.gameData[0]][self.gameData[1]]['command'](self)
+        self.autonCommand.start()
 
     def autonomousPeriodic(self):
         """

@@ -27,7 +27,7 @@ class CharacterizeDrivetrain(Command):
             self.startTime = self.robot.timer.get()
             self.startTimer = False
 
-        if self.robot.timer.get() - self.startTime < 3.0:
+        if self.robot.timer.get() - self.startTime < 2.0:
             self.robot.smartDashboard.putNumber("rVelocity",
                                                 self.robot.driveTrain.getRightVelocity())
             self.robot.smartDashboard.putNumber("lVelocity",

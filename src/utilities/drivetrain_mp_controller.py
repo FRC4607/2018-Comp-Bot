@@ -219,7 +219,7 @@ class DrivetrainMPController():
                                     self._profileSlotSelect0,                                               # PID0 slot index
                                     self._profileSlotSelect1,                                               # PID0 slot index
                                     True if i+1 == len(self._leftPoints) else False,                        # Last point flag
-                                    True if i == 0 and self.SYNC_CONSTANT == 0 else False,                  # Zero postion flag
+                                    True if i == 0 else False,                                              # Zero postion flag
                                     self._getTrajectoryDuration(self._leftPoints[i][3]))                    # Duration
             self._leftTalon.pushMotionProfileTrajectory(point)                                              # Push the trajectory point (top buffer)
             point = TrajectoryPoint(-self._rightPoints[i][0] if self.reverse else self._rightPoints[i][0],

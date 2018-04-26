@@ -20,6 +20,10 @@ class DriveTrain(Subsystem):
     differential drive is connected to CTRE's magnetic encoders.  There is a Pigeon IMU connected to one of the spare Talon's and the data is
     available over the CANbus.
     """
+    
+    MP_SLOT0_SELECT = 0
+    MP_SLOT1_SELECT = 1
+    
     def __init__(self, robot):
         super().__init__()
         self.robot = robot
