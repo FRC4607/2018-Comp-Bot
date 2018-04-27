@@ -13,3 +13,8 @@
 /intake_motors_switch_out_slow.cpython-36.pyc
 /boom_to_intake.cpython-36.pyc
 /boom_to_switch.cpython-36.pyc
+/boom_to_scale.cpython-36.pyc
+/close_intake.cpython-36.pyc
+/open_intake.cpython-36.pyc
+/shoot_cube_into_switch.cpython-36.pyc
+/start_intake.cpython-36.pyc

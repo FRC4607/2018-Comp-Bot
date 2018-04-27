@@ -148,6 +148,9 @@ class Pitchfork(TimedRobot):
         Initialization code for autonomous mode should go here.  This method will be called each
         time the robot enters autonomous mode.
         """
+        # Boom state start at the scale
+        self.boomState = BOOM_STATE.Scale
+
         self.scheduleAutonomous = True
         if not self.timer.running:
             self.timer.start()

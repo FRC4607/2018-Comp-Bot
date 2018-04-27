@@ -17,6 +17,6 @@ class AutonRightStartRightSwitch(CommandGroup):
             path = pickle.load(fp)
 
         # Add commands to run
-        self.addSequential(DrivetrainPathFollower(robot, path, False))
+        self.addParallel(BoomToSwitch(robot))
         self.addSequential(DrivetrainPathFollower(robot, path, False))
         self.addSequential(ShootCubeIntoSwitch(robot))
