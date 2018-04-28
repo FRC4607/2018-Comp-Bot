@@ -131,7 +131,8 @@ def GeneratePath(path_name, file_name, waypoints, settings, reverse=False, headi
     plt.show()
 
 
-def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings, reverse=False):
+def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings, reverse=False,
+                                      heading_overide=False, headingValue=0.0):
     """
     This function will take a set of pathfinder waypoints and create the trajectories to follow a path going through the waypoints.  This path is
     specific for the drivetrain controllers, so the position will use the CTRE quadrature encoders, the velocity will use the feed-forward in
@@ -154,11 +155,14 @@ def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings,
     headings = {"left": [], "right": []}
     for i in range(len(leftTrajectory)):
         heading = pf.r2d(leftTrajectory[i].heading)
-        if not reverse:
-            if pf.r2d(leftTrajectory[i].heading) > 180:
-                heading = pf.r2d(leftTrajectory[i].heading) - 360
+        if heading_overide:
+            heading = headingValue
         else:
-                heading = -(pf.r2d(leftTrajectory[i].heading) - 180)
+            if not reverse:
+                if pf.r2d(leftTrajectory[i].heading) > 180:
+                    heading = pf.r2d(leftTrajectory[i].heading) - 360
+            else:
+                    heading = -(pf.r2d(leftTrajectory[i].heading) - 180)
             
             
         headings["left"].append(heading)
@@ -170,11 +174,15 @@ def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings,
                              3600 * heading / 360,                                          # Pigeon IMU setup for 3600 units per rotation
                              int(leftTrajectory[i].dt * 1000)])                             # Duration
         heading = pf.r2d(rightTrajectory[i].heading)
-        if not reverse:
-            if pf.r2d(rightTrajectory[i].heading) > 180:
-                heading = pf.r2d(rightTrajectory[i].heading) - 360
+        if heading_overide:
+            heading = headingValue
         else:
-                heading = -(pf.r2d(rightTrajectory[i].heading) - 180)
+            if not reverse:
+                if pf.r2d(rightTrajectory[i].heading) > 180:
+                    heading = pf.r2d(rightTrajectory[i].heading) - 360
+            else:
+                    heading = -(pf.r2d(rightTrajectory[i].heading) - 180)
+
         headings["right"].append(heading)
         path["right"].append([rightTrajectory[i].position * 4096 /
                               (ROBOT_WHEEL_DIAMETER_FT * math.pi),

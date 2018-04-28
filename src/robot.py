@@ -58,7 +58,7 @@ class Pitchfork(TimedRobot):
                                                     "Scale": {'command': AutonForward}
                                                     },
                                               "L": {"No Scale": {'command': AutonForward},
-                                                    "Scale": {'command': AutonLeftStartLeftScale}
+                                                    "Scale": {'command': AutonForward}
                                                     },
                                               },
                                         "L": {"R": {"No Scale": {'command': AutonLeftStartLeftSwitch},
@@ -92,7 +92,7 @@ class Pitchfork(TimedRobot):
                                                      },
                                                },
                                          "L": {"R": {"No Scale": {'command': AutonForward}, 
-                                                     "Scale": {AutonRightStartRightScale}
+                                                     "Scale": {'command': AutonForward}
                                                      },
                                                "L": {"No Scale": {'command': AutonForward},
                                                      "Scale": {'command': AutonForward}
@@ -148,8 +148,6 @@ class Pitchfork(TimedRobot):
         Initialization code for autonomous mode should go here.  This method will be called each
         time the robot enters autonomous mode.
         """
-        # Boom state start at the scale
-        self.boomState = BOOM_STATE.Scale
 
         self.scheduleAutonomous = True
         if not self.timer.running:

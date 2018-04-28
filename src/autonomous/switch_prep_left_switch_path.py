@@ -43,7 +43,7 @@ yOffset = -(Y_WALL_TO_EXCHANGE_FAR + 0.5 * Y_ROBOT_WIDTH)
 
 waypoints = [
     pf.Waypoint(0, 0, 0),
-    pf.Waypoint(48 / 12, 0, 0),
+    pf.Waypoint(70 / 12, 0, 0),
 ]
 
 GenerateTalonMotionProfileArcPath(os.path.dirname(__file__), "switch_prep_left_switch", waypoints, settings)

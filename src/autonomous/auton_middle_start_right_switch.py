@@ -40,24 +40,23 @@ class AutonMiddleStartRightSwitch(CommandGroup):
         # Go to switch
         self.addParallel(BoomToSwitch(robot))
         self.addSequential(DrivetrainPathFollower(robot, path, False))
-        self.addSequential(ShootCubeIntoSwitch(robot))
+        self.addParallel(ShootCubeIntoSwitch(robot))
  
-        # Go to cube retrevial position
-        self.addParallel(OpenIntake(robot))
+        # Go to cube retrieval position
         self.addParallel(BoomToIntake(robot))
+        self.addParallel(OpenIntake(robot))
         self.addSequential(DrivetrainPathFollower(robot, cubePosPath, True))
   
-  #=================================================================================================
-  #       # Go to pick up the next cube
-  #       self.addSequential(DrivetrainPathFollower(robot, cubeGetPath, False, True))
-  #       self.addParallel(StartIntake(robot))
-  #       self.addParallel(CloseIntake(robot))
-  # 
-  #       # Go back to start
-  #       self.addParallel(BoomToSwitch(robot))
-  #       self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPrepPath, True))
-  # 
-  #       # Go to switch
-  #       # self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPath, False, True))
-  #       # self.addSequential(ShootCubeIntoSwitch(robot))
-  #=================================================================================================
+        # Go to pick up the next cube
+        self.addSequential(DrivetrainPathFollower(robot, cubeGetPath, False, True))
+        self.addParallel(StartIntake(robot))
+        self.addParallel(CloseIntake(robot))
+   
+        # Go back to start
+        self.addParallel(BoomToSwitch(robot))
+        self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPrepPath, True))
+        
+        # Go to switch
+        self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPath, False, True))
+        self.addSequential(ShootCubeIntoSwitch(robot))
+

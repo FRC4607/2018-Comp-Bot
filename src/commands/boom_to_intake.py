@@ -37,7 +37,7 @@ class BoomToIntake(Command):
             startPotError = abs(self.robot.boom.getPotPositionInDegrees() -
                                 self.robot.boom.POT_SWITCH_POSITION_DEG)
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
-
+    
                 # Create the motion profile controller object
                 startingPostion = self.robot.boom.getPotPosition()
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,

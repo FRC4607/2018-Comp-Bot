@@ -34,9 +34,12 @@ PathFinderSettings = namedtuple("PathFinderSettings", ["order", "samples", "peri
 settings = PathFinderSettings(order=pf.FIT_HERMITE_CUBIC,
                               samples=1000000,
                               period=0.01,
-                              maxVelocity=3.0,
-                              maxAcceleration=6,
-                              maxJerk=30)
+                              #maxVelocity=3.0,# 
+                              maxVelocity=5.0,
+                              #maxAcceleration=6,#
+                              maxAcceleration=7,
+                              #maxJerk=30#
+                              maxJerk=40)
 
 # The waypoints are entered as X, Y, and Theta.  +X is forward, +Y is left, and +Theta is measured from +X to +Y
 xOffset = 0.5 * X_ROBOT_LENGTH

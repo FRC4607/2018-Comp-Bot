@@ -6,7 +6,6 @@ from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, Y_WALL_TO_EXCHANGE_FAR, \
     X_WALL_TO_SWITCH_NEAR, Y_WALL_TO_SWITCH_NEAR
 from utilities.functions import GeneratePath, GenerateTalonMotionProfileArcPath
 
-
 #===================================================================================================
 # class settings():
 #     order = pf.FIT_HERMITE_CUBIC
@@ -33,8 +32,10 @@ PathFinderSettings = namedtuple("PathFinderSettings", ["order", "samples", "peri
 settings = PathFinderSettings(order=pf.FIT_HERMITE_CUBIC,
                               samples=1000000,
                               period=0.01,
-                              maxVelocity=3.0,
-                              maxAcceleration=6,
+                              #maxVelocity=3.0,#
+                              maxVelocity=5.0,
+                              #maxAcceleration=6,#
+                              maxAcceleration=7,
                               maxJerk=30)
 
 # The waypoints are entered as X, Y, and Theta.  +X is forward, +Y is left, and +Theta is measured from +X to +Y
@@ -42,8 +43,8 @@ xOffset = 0.5 * X_ROBOT_LENGTH
 yOffset = -(Y_WALL_TO_EXCHANGE_FAR + 0.5 * Y_ROBOT_WIDTH)
 
 waypoints = [
-    pf.Waypoint(0, 0, pf.d2r(45.0)),
-    pf.Waypoint(-50 / 12, 0, 0),
+    pf.Waypoint(0, 0, pf.d2r(-45.0)),
+    pf.Waypoint(-40 / 12, 38 / 12, 0),
 ]
 
-GenerateTalonMotionProfileArcPath(os.path.dirname(__file__), "right_cube_get_switch_prep", waypoints, settings)
+GenerateTalonMotionProfileArcPath(os.path.dirname(__file__), "right_cube_get_switch_prep", waypoints, settings, True)
