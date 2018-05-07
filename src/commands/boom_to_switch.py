@@ -37,17 +37,16 @@ class BoomToSwitch(Command):
                                 self.robot.boom.POT_INTAKE_POSITION_DEG)
             if startPotError < self.robot.boom.POT_ERROR_LIMIT:
 
-                # Create the motion profile controller object
+            # Create the motion profile controller object
                 startingPostion = self.robot.boom.getPotPosition()
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.intakeToSwitchPath,
                                                                        False,
-                                                                       startingPostion,
                                                                        0,
                                                                        0)
                 # The start method will signal the motion profile controller to start
                 self.motionProfileController.start()
-
+    
             else:
                 logger.warning("Boom to Switch Command not started - StartPotError: %3.1f" %
                                (startPotError))
@@ -66,7 +65,6 @@ class BoomToSwitch(Command):
                 self.motionProfileController = MotionProfileController(self.robot.boom.talon,
                                                                        self.switchToScalePath,
                                                                        True,
-                                                                       startingPostion,
                                                                        0,
                                                                        0)
                 # The start method will signal the motion profile controller to start

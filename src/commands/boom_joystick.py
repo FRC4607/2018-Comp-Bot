@@ -35,6 +35,7 @@ class BoomJoystick(Command):
         if boomThrottle < 0.05 and boomThrottle > -0.05:
             boomThrottle = 0.0
         else:
-            self.robot.boomState = BOOM_STATE.Unknown
+            # self.robot.boomState = BOOM_STATE.Unknown
+            pass
 
         self.robot.boom.talon.set(WPI_TalonSRX.ControlMode.PercentOutput, boomThrottle)

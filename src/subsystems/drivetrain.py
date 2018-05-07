@@ -16,15 +16,14 @@ logger.setLevel(LOGGER_LEVEL)
 
 class DriveTrain(Subsystem):
     """
-    The DriveTrain subsytem is used by the driver as well as the Pathfinder and Motion Profile
-    controllers.  The default command is DriveJoystick.  Each side of the differential drive is
-    connected to CTRE's magnetic encoders.
+    The DriveTrain subsytem is used by the driver as well as the Motion Profile controllers.  The default command is DriveJoystick.  Each side of the
+    differential drive is connected to CTRE's magnetic encoders.  There is a Pigeon IMU connected to one of the spare Talon's and the data is
+    available over the CANbus.
     """
-
-    ENCODER_TICKS_PER_REV = 4096
+    
     MP_SLOT0_SELECT = 0
-    MP_SLOT1_SELECT = 0
-
+    MP_SLOT1_SELECT = 1
+    
     def __init__(self, robot):
         super().__init__()
         self.robot = robot
@@ -35,96 +34,90 @@ class DriveTrain(Subsystem):
         self.frontRight = WPI_TalonSRX(DRIVETRAIN_FRONT_RIGHT_MOTOR)
         self.rightTalon = WPI_TalonSRX(DRIVETRAIN_REAR_RIGHT_MOTOR)
 
-        # Set the front motors to be the followers of the rear motors
-        self.frontLeft.set(WPI_TalonSRX.ControlMode.Follower, DRIVETRAIN_REAR_LEFT_MOTOR)
-        self.frontRight.set(WPI_TalonSRX.ControlMode.Follower, DRIVETRAIN_REAR_RIGHT_MOTOR)
-
         # Add the motors to the speed controller groups and create the differential drivetrain
         self.leftDrive = SpeedControllerGroup(self.frontLeft, self.leftTalon)
         self.rightDrive = SpeedControllerGroup(self.frontRight, self.rightTalon)
         self.diffDrive = DifferentialDrive(self.leftDrive, self.rightDrive)
 
-        # Setup the default motor controller setup
-        self.initControllerSetup()
-
-        # Map the pigeon.  This will be connected to an unused Talon.
+        # Map the pigeon
         self.talonPigeon = WPI_TalonSRX(DRIVETRAIN_PIGEON)
         self.pigeonIMU = PigeonIMU(self.talonPigeon)
+
+        # Setup the default motor controller setup
+        self.initControllerSetup()
 
     def initControllerSetup(self):
         """
         This method will setup the default settings of the motor controllers.
         """
-        # Feedback sensor phase
-        self.leftTalon.setSensorPhase(True)
-        self.rightTalon.setSensorPhase(True)
+        # Set the front motors to be the followers of the rear motors
+        self.frontLeft.set(WPI_TalonSRX.ControlMode.Follower, DRIVETRAIN_REAR_LEFT_MOTOR)
+        self.frontRight.set(WPI_TalonSRX.ControlMode.Follower, DRIVETRAIN_REAR_RIGHT_MOTOR)
+
+        # Set the neutral output mode to Brake/Coast/
+        self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
+        self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Brake)
 
         # Diable the motor-safety
         self.diffDrive.setSafetyEnabled(False)
 
-        # Enable brake/coast mode
-        self.leftTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Coast)
-        self.rightTalon.setNeutralMode(WPI_TalonSRX.NeutralMode.Coast)
+        # Set the feedback sensor phases
+        self.leftTalon.setSensorPhase(True)
+        self.rightTalon.setSensorPhase(True)
 
-        # This function will intiliaze the drivetrain motor controllers to the factory defaults.
-        # Only values which do not match the factory default will be written.  Any values which
-        # are explicity listed will be skipped (ie any values written prior in this method).
+        # Setup the Pigeon IMU and Talon Mag Encoders
+        self.initPigeonIMU()
+        self.initQuadratureEncoder()
 
-        #  ***** TODO *****  #
-
-    def initiaizeDrivetrainMotionProfileControllers(self, stream_rate):
-        """
-        This method will initialize the Talon's for motion profiling
-        """
-        # Invert right motors
-        self.rightTalon.setInverted(True)
-        self.frontRight.setInverted(True)
-
-        # Enable voltage compensation for 12V
+        # Set the voltage compensation to 12V and disable it for now
         self.leftTalon.configVoltageCompSaturation(12.0, 10)
-        self.leftTalon.enableVoltageCompensation(True)
+        self.leftTalon.enableVoltageCompensation(False)
         self.rightTalon.configVoltageCompSaturation(12.0, 10)
-        self.rightTalon.enableVoltageCompensation(True)
+        self.rightTalon.enableVoltageCompensation(False)
 
         # PIDF slot index 0 is for autonomous wheel postion
-        # There are 4096 encoder units per rev.  1 rev of the wheel is pi * diameter.  That
-        # evaluates to 2607.6 encoder units per foot.  For the feed-forward system, we expect very
-        # tight position control, so use a P-gain which drives full throttle at 8" of error.  This
-        # evaluates to 0.588 = (1.0 * 1023) / (8 / 12 * 2607.6)
-        self.leftTalon.config_kP(0, 0.0, 10)
+        self.leftTalon.config_kP(0, 0.8, 10)
         self.leftTalon.config_kI(0, 0.0, 10)
         self.leftTalon.config_kD(0, 0.0, 10)
-        self.leftTalon.config_kF(0, 1023 / 12, 10)   # 10-bit ADC / 12 V
-        self.leftTalon.config_IntegralZone(0, 100, 10);
-        self.leftTalon.configClosedLoopPeakOutput(0, 1.0, 10)
-        self.rightTalon.config_kP(0, 0.0, 10)
+        self.leftTalon.config_kF(0, 1023 / 12, 10)   # 10-bit ADC units / 12 V
+        self.rightTalon.config_kP(0, 0.8, 10)
         self.rightTalon.config_kI(0, 0.0, 10)
         self.rightTalon.config_kD(0, 0.0, 10)
-        self.rightTalon.config_kF(0, 1023 / 12, 10)  # 10-bit ADC / 12 V
-        self.rightTalon.config_IntegralZone(0, 100, 10);
-        self.rightTalon.configClosedLoopPeakOutput(0, 1.0, 10)
+        self.rightTalon.config_kF(0, 1023 / 12, 10)  # 10-bit ADC units / 12 V
 
-        # PIDF slot index 1 is for autonomous heading
-        self.leftTalon.config_kP(1, 0, 10)
+        # PIDF slot index 1 is for autonomous heading postion
+        self.leftTalon.config_kP(1, 1.0, 10)
         self.leftTalon.config_kI(1, 0, 10)
         self.leftTalon.config_kD(1, 0, 10)
         self.leftTalon.config_kF(1, 0, 10)
-        self.leftTalon.config_IntegralZone(1, 100, 10);
-        self.leftTalon.configClosedLoopPeakOutput(1, 1.0, 10)
-        self.rightTalon.config_kP(1, 0, 10)
+        self.rightTalon.config_kP(1, 1.0, 10)
         self.rightTalon.config_kI(1, 0, 10)
         self.rightTalon.config_kD(1, 0, 10)
         self.rightTalon.config_kF(1, 0, 10)
-        self.rightTalon.config_IntegralZone(1, 100, 10);
-        self.rightTalon.configClosedLoopPeakOutput(1, 1.0, 10)
+
+    def pidKludge(self):
+        """
+        This method is here until we can figure out why some of the profiles have an instaneous output for only a few milliseconds.  The issue has
+        been isolated to the encoder position feed-back loop.
+        """
+        self.leftTalon.config_kP(0, 0.01, 10)
+        self.rightTalon.config_kP(0, 0.01, 10)
+
+    def initiaizeDrivetrainMotionProfileControllers(self, stream_rate_ms):
+        """
+        This method will initialize the Talon's for motion profiling.
+        """
+        # Invert the right-side motors.  This is done here becuase manual driving commnds account for the motor inversion.
+        self.rightTalon.setInverted(True)
+        self.frontRight.setInverted(True)
+
+        # Enable voltage compensation for 12V.  This is important since the motion profile feed-forward is in terms of volts.
+        self.leftTalon.enableVoltageCompensation(True)
+        self.rightTalon.enableVoltageCompensation(True)
 
         # Change the control frame period
-        self.leftTalon.changeMotionControlFramePeriod(stream_rate)
-        self.rightTalon.changeMotionControlFramePeriod(stream_rate)
-
-        # Initilaize the quadrature encoders and pigeon IMU
-        self.initQuadratureEncoder()
-        self.initPigeonIMU()
+        self.leftTalon.changeMotionControlFramePeriod(stream_rate_ms)
+        self.rightTalon.changeMotionControlFramePeriod(stream_rate_ms)
 
     def cleanUpDrivetrainMotionProfileControllers(self):
         '''
@@ -135,34 +128,43 @@ class DriveTrain(Subsystem):
         self.frontRight.setInverted(False)
 
         # Change the control frame period back to the default
-        framePeriod = TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS
-        self.leftTalon.changeMotionControlFramePeriod(framePeriod)
-        self.rightTalon.changeMotionControlFramePeriod(framePeriod)
+        self.leftTalon.changeMotionControlFramePeriod(TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS)
+        self.rightTalon.changeMotionControlFramePeriod(TALON_DEFAULT_MOTION_CONTROL_FRAME_PERIOD_MS)
 
     def initPigeonIMU(self):
-        # false means talon's local output is PID0 + PID1, and other side Talon is PID0 - PID1
-        # true means talon's local output is PID0 - PID1, and other side Talon is PID0 + PID1
-        self.rightTalon.configAuxPIDPolarity(False, 10)
-        self.leftTalon.configAuxPIDPolarity(True, 10)
+        # The default AUX1 polarity behavior is False, PID0 + PID1.  To flip this behaviour, set to True and the result will be PID0 - PID1.
+        # For our implementation, both motor controllers are setup as primary, but that doesn't change the behavior of the AUX1 polarity.
+        self.rightTalon.configAuxPIDPolarity(False, 10)  # PID0 + PID1
+        self.leftTalon.configAuxPIDPolarity(True, 10)    # PID0 - PID1
 
-        # select a gadgeteer pigeon for remote 0
-        self.rightTalon.configRemoteFeedbackFilter(self.talonPigeon.getDeviceID(),
-                                                   RemoteSensorSource.GadgeteerPigeon_Yaw,
-                                                   0, 10)
-        self.leftTalon.configRemoteFeedbackFilter(self.talonPigeon.getDeviceID(),
-                                                  RemoteSensorSource.GadgeteerPigeon_Yaw,
-                                                  0, 10)
+        # Select a gadgeteer pigeon for remote 0
+        self.rightTalon.configRemoteFeedbackFilter(self.talonPigeon.getDeviceID(),          # Device ID of the Talon the Pigeon is connected to
+                                                   RemoteSensorSource.GadgeteerPigeon_Yaw,  # Using the ribbon-cable-connected Yaw for feedback
+                                                   0,                                       # Remote source, either 0 or 1
+                                                   10)                                      # Timeout MS
+        self.leftTalon.configRemoteFeedbackFilter(self.talonPigeon.getDeviceID(),           # Device ID of the Talon the Pigeon is connected to
+                                                  RemoteSensorSource.GadgeteerPigeon_Yaw,   # Using the ribbon-cable-connected Yaw for feedback
+                                                  0,                                        # Remote source, either 0 or 1
+                                                  10)                                       # Timeout MS
 
         # Select the remote feedback sensor for PID1
-        self.rightTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.RemoteSensor0, 1, 10)
-        self.leftTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.RemoteSensor0, 1, 10)
+        self.rightTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.RemoteSensor0,  # Select the remote sensor we just created
+                                                     1,                                          # PID 0 or 1
+                                                     10)                                         # Timeout MS
+        self.leftTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.RemoteSensor0,   # Select the remote sensor we just created
+                                                    1,                                           # PID 0 or 1
+                                                    10)                                          # Timeout MS
 
-        # Using the config feature, scale units to 3600 per rotation.  This is nice as it keeps
-        # 0.1 deg resolution, and is fairly intuitive.
+        # The Pigeon IMU uses a 14-bit DAC to capture the +- yaw data.  A scaling factor of 3600 units/rotation will be applied to the yaw feedback
+        # sensor data.  This will leave roughly +-2.25 rotations of yaw data.  When adding a targets for the pigeon heading,
+        # multiply 3600 units/rotation by heading rotations.
         self.rightTalon.configSelectedFeedbackCoefficient(3600 / 8192, 1, 10)
         self.leftTalon.configSelectedFeedbackCoefficient(3600 / 8192, 1, 10)
 
-        # Zero the sensor
+    def zeroGyro(self):
+        """
+        This method will set the yaw and accumulated z-angle of the gyro to 0.
+        """
         self.pigeonIMU.setYaw(0, 10)
         self.pigeonIMU.setAccumZAngle(0, 10)
 
@@ -170,55 +172,45 @@ class DriveTrain(Subsystem):
         """
         This method will initialize the encoders for quadrature feedback.
         """
-        self.leftTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.CTRE_MagEncoder_Relative,
-                                                    0, 10)
-        self.rightTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.CTRE_MagEncoder_Relative,
-                                                     0, 10)
+        self.leftTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10)
+        self.rightTalon.configSelectedFeedbackSensor(WPI_TalonSRX.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10)
+
+    def zeroQuadratureEncoder(self):
         self.leftTalon.getSensorCollection().setQuadraturePosition(0, 10)
         self.rightTalon.getSensorCollection().setQuadraturePosition(0, 10)
 
+    def seedQuadratureEncoder(self, seedValue):
+        self.leftTalon.getSensorCollection().setQuadraturePosition(seedValue, 10)
+        self.rightTalon.getSensorCollection().setQuadraturePosition(seedValue, 10)
+
     def getLeftQuadraturePosition(self):
         """
-        This method will return the left-side sensor quadrature position.  The sign needs to
-        manually be handled here since this function is used to provide the sensor postion outide
-        of the talon.
+        This method will return the left-side sensor quadrature position.  The sign needs to manually be handled here since this function is used to
+        provide the sensor postion outide of the talon.
         """
         return -self.leftTalon.getSensorCollection().getQuadraturePosition()
 
     def getRightQuadraturePosition(self):
         """
-        This method will return the right-side sensor quadrature position.  The sign needs to
-        manually be handled here since this function is used to provide the sensor postion outide
-        of the talon.
+        This method will return the right-side sensor quadrature position.  The sign needs to manually be handled here since this function is used to
+        provide the sensor postion outide of the talon.
         """
         return self.rightTalon.getSensorCollection().getQuadraturePosition()
 
     def setQuadratureStatusFramePeriod(self, sample_period_ms):
         """
-        This method will set the status frame persiod of the quadrature encoder
+        This method will set the status frame persiod of the quadrature encoder.
         """
-        self.leftTalon.setStatusFramePeriod(WPI_TalonSRX.StatusFrameEnhanced.Status_3_Quadrature,
-                                            sample_period_ms, 10)
-        self.rightTalon.setStatusFramePeriod(WPI_TalonSRX.StatusFrameEnhanced.Status_3_Quadrature,
-                                             sample_period_ms, 10)
+        self.leftTalon.setStatusFramePeriod(WPI_TalonSRX.StatusFrameEnhanced.Status_3_Quadrature, sample_period_ms, 10)
+        self.rightTalon.setStatusFramePeriod(WPI_TalonSRX.StatusFrameEnhanced.Status_3_Quadrature, sample_period_ms, 10)
 
     def setDefaultQuadratureStatusFramePeriod(self):
         """
         This method will set the status frame persiod of the quadrature encoder back to the factory
         default.
         """
-        self.leftTalon.setStatusFramePeriod(WPI_TalonSRX.StatusFrameEnhanced.Status_3_Quadrature,
-                                            TALON_DEFAULT_QUADRATURE_STATUS_FRAME_PERIOD_MS, 10)
-        self.rightTalon.setStatusFramePeriod(WPI_TalonSRX.StatusFrameEnhanced.Status_3_Quadrature,
-                                             TALON_DEFAULT_QUADRATURE_STATUS_FRAME_PERIOD_MS, 10)
-
-    def pathFinderDrive(self, leftOutput, rightOutput):
-        """
-        This method will take the Pathfinder Controller motor output and apply them to the
-        drivetrain.
-        """
-        self.leftTalon.set(WPI_TalonSRX.ControlMode.PercentOutput, leftOutput)
-        self.rightTalon.set(WPI_TalonSRX.ControlMode.PercentOutput, -rightOutput)
+        self.leftTalon.setStatusFramePeriod(WPI_TalonSRX.StatusFrameEnhanced.Status_3_Quadrature, TALON_DEFAULT_QUADRATURE_STATUS_FRAME_PERIOD_MS, 10)
+        self.rightTalon.setStatusFramePeriod(WPI_TalonSRX.StatusFrameEnhanced.Status_3_Quadrature, TALON_DEFAULT_QUADRATURE_STATUS_FRAME_PERIOD_MS, 10)
 
     def getLeftVelocity(self):
         return self.leftTalon.getSensorCollection().getQuadratureVelocity()

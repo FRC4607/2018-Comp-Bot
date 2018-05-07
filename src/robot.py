@@ -7,10 +7,13 @@ from subsystems.intake_motors import IntakeMotors
 from subsystems.drivetrain import DriveTrain
 from subsystems.boom import Boom
 from oi import OI
-from autonomous.autonomous_chooser import *
 from autonomous.auton_forward import AutonForward
-from autonomous.auton_middle_start_left_switch import AutonMiddleStartLeftSwitch
 from autonomous.auton_left_start_left_scale import AutonLeftStartLeftScale
+from autonomous.auton_right_start_right_scale import AutonRightStartRightScale
+from autonomous.auton_left_start_left_switch import AutonLeftStartLeftSwitch
+from autonomous.auton_right_start_right_switch import AutonRightStartRightSwitch
+from autonomous.auton_middle_start_left_switch import AutonMiddleStartLeftSwitch
+from autonomous.auton_middle_start_right_switch import AutonMiddleStartRightSwitch
 from constants import BOOM_STATE, LOGGER_LEVEL
 import logging
 logger = logging.getLogger(__name__)
@@ -39,31 +42,64 @@ class Pitchfork(TimedRobot):
         self.smartDashboard = SmartDashboard()
 
         # Create the sendable choosers to get the autonomous preferences
-        self.scoringElementChooser = SendableChooser()
-        self.scoreScale = ScoreScale()
-        self.scoreSwitch = ScoreSwitch()
-        self.scoringElementChooser.addObject("Score Scale", self.scoreScale)
-        self.scoringElementChooser.addObject("Score Switch", self.scoreSwitch)
-        self.scoringElementChooser.addDefault("Score Scale", self.scoreScale)
-        self.smartDashboard.putData("Score Field Element", self.scoringElementChooser)
+        self.startSpotChooser = SendableChooser()
+        self.startSpotChooser.addObject("Start Left", 'Left')
+        self.startSpotChooser.addObject("Start Right", 'Right')
+        self.startSpotChooser.addDefault("Start Middle", 'Middle')
+        self.smartDashboard.putData("Starting Spot", self.startSpotChooser)
 
-        self.crossFieldChooser = SendableChooser()
-        self.crossFieldEnable = CrossFieldEnable()
-        self.crossFieldDisable = CrossFieldDisable()
-        self.crossFieldChooser.addObject("Cross Field Enable", self.crossFieldEnable)
-        self.crossFieldChooser.addObject("Cross Field Disable", self.crossFieldDisable)
-        self.crossFieldChooser.addDefault("Cross Field Disable", self.crossFieldDisable)
-        self.smartDashboard.putData("Cross Field Enable", self.crossFieldChooser)
+        self.scaleDisableChooser = SendableChooser()        
+        self.scaleDisableChooser.addObject("Enable Scale", 'Scale')
+        self.scaleDisableChooser.addDefault("Disable Scale", 'No Scale')
+        self.smartDashboard.putData("Scale Enable", self.scaleDisableChooser)
 
-        self.positionChooser = SendableChooser()
-        self.startingLeft = StartingLeft()
-        self.startingRight = StartingRight()
-        self.startingMiddle = StartingMiddle()
-        self.positionChooser.addObject("Start Left", self.startingLeft)
-        self.positionChooser.addObject("Start Right", self.startingRight)
-        self.positionChooser.addObject("Start Middle", self.startingMiddle)
-        self.positionChooser.addDefault("Start Middle", self.startingMiddle)
-        self.smartDashboard.putData("Starting Position", self.positionChooser)
+        # Build up the autonomous dictionary.  Fist key is the starting position.  The second key is the switch.  The third key is the scale.
+        self.chooserOptions = {"Left": {"R": {"R": {"No Scale": {'command': AutonForward},
+                                                    "Scale": {'command': AutonForward}
+                                                    },
+                                              "L": {"No Scale": {'command': AutonForward},
+                                                    "Scale": {'command': AutonForward}
+                                                    },
+                                              },
+                                        "L": {"R": {"No Scale": {'command': AutonLeftStartLeftSwitch},
+                                                    "Scale": {'command': AutonLeftStartLeftSwitch}
+                                                    },
+                                              "L": {"No Scale": {'command': AutonLeftStartLeftSwitch},
+                                                    "Scale": {'command': AutonLeftStartLeftSwitch}
+                                                    },
+                                              },
+                                        },
+                               "Middle": {"R": {"R": {"No Scale": {'command': AutonMiddleStartRightSwitch},
+                                                      "Scale": {'command': AutonMiddleStartRightSwitch}
+                                                      },
+                                                "L": {"No Scale": {'command': AutonMiddleStartRightSwitch},
+                                                      "Scale": {'command': AutonMiddleStartRightSwitch}
+                                                      },
+                                                },
+                                          "L": {"R": {"No Scale": {'command': AutonMiddleStartLeftSwitch},
+                                                      "Scale": {'command': AutonMiddleStartLeftSwitch}
+                                                      },
+                                                "L": {"No Scale": {'command': AutonMiddleStartLeftSwitch},
+                                                      "Scale": {'command': AutonMiddleStartLeftSwitch}
+                                                      },
+                                                },
+                                          },
+                               "Right": {"R": {"R": {"No Scale": {'command': AutonRightStartRightSwitch},
+                                                     "Scale": {'command': AutonRightStartRightSwitch}
+                                                     },
+                                               "L": {"No Scale": {'command': AutonRightStartRightSwitch},
+                                                     "Scale": {'command': AutonRightStartRightSwitch}
+                                                     },
+                                               },
+                                         "L": {"R": {"No Scale": {'command': AutonForward}, 
+                                                     "Scale": {'command': AutonForward}
+                                                     },
+                                               "L": {"No Scale": {'command': AutonForward},
+                                                     "Scale": {'command': AutonForward}
+                                                     },
+                                               },
+                                         },
+                               }
 
         # Create a timer for data logging
         self.timer = Timer()
@@ -74,40 +110,20 @@ class Pitchfork(TimedRobot):
         # Boom state start at the scale
         self.boomState = BOOM_STATE.Scale
 
-        self.autonForward = AutonForward(self)
-        self.autonMiddleStartLeftSwitch = AutonMiddleStartLeftSwitch(self)
-        self.autonLeftStartLeftScale = AutonLeftStartLeftScale(self)
+        #===========================================================================================
+        # if LOGGER_LEVEL == logging.INFO:
+        #     self.smartDashboard.putNumber("rVelocity",
+        #                                   self.driveTrain.getRightVelocity())
+        #     self.smartDashboard.putNumber("lVelocity",
+        #                                   self.driveTrain.getLeftVelocity())
+        #     self.smartDashboard.putNumber("rVoltage",
+        #                                   self.driveTrain.getRightVoltage())
+        #     self.smartDashboard.putNumber("lVoltage",
+        #                                   self.driveTrain.getLeftVoltage())
+        #     self.smartDashboard.putNumber("TimeStamp",
+        #                                   self.timer.get())
+        #===========================================================================================
 
-
-        # Output debug data to the smartdashboard
-        if LOGGER_LEVEL == logging.DEBUG:
-            #=======================================================================================
-            # self.smartDashboard.putNumber("RightEncPos", 0.0)
-            # self.smartDashboard.putNumber("RightActPos", 0.0)
-            # self.smartDashboard.putNumber("RightEncVel", 0.0)
-            # self.smartDashboard.putNumber("RightActVel", 0.0)
-            # self.smartDashboard.putNumber("RightPrimaryTarget", 0.0)
-            # self.smartDashboard.putNumber("RightPrimaryError", 0.0)
-            # self.smartDashboard.putNumber("TimeStamp", 0.0)
-            # self.smartDashboard.putNumber("LeftEncPos", 0.0)
-            # self.smartDashboard.putNumber("LeftActPos", 0.0)
-            # self.smartDashboard.putNumber("LeftEncVel", 0.0)
-            # self.smartDashboard.putNumber("LeftActVel", 0.0)
-            # self.smartDashboard.putNumber("LeftPrimaryTarget", 0.0)
-            # self.smartDashboard.putNumber("LeftPrimaryError", 0.0)
-            # self.smartDashboard.putNumber("RightTopBufferCount", 0.0)
-            # self.smartDashboard.putNumber("LeftTopBufferCount", 0.0)
-            # self.smartDashboard.putNumber("LeftBottomBufferCount", 0.0)
-            # self.smartDashboard.putNumber("RightBottomBufferCount", 0.0)
-            #=======================================================================================
-            self.smartDashboard.putNumber("EncPos", 0.0)
-            self.smartDashboard.putNumber("ActPos", 0.0)
-            self.smartDashboard.putNumber("EncVel", 0.0)
-            self.smartDashboard.putNumber("ActVel", 0.0)
-            self.smartDashboard.putNumber("PrimaryTarget", 0.0)
-            self.smartDashboard.putNumber("PrimaryError", 0.0)
-            self.smartDashboard.putNumber("TimeStamp", 0.0)
-            
     def disabledInit(self):
         """
         Initialization code for disabled mode should go here.  This method will be called each
@@ -132,42 +148,30 @@ class Pitchfork(TimedRobot):
         Initialization code for autonomous mode should go here.  This method will be called each
         time the robot enters autonomous mode.
         """
+
         self.scheduleAutonomous = True
         if not self.timer.running:
             self.timer.start()
 
-        # Get the prioritized scoring element, robot starting posion, and the alliance
-        # scale/switch data.
-        self.selectedCrossFieldEnable = self.crossFieldChooser.getSelected()
-        self.selectedScoringElement = self.scoringElementChooser.getSelected()
-        self.selectedStartingPosition = self.positionChooser.getSelected()
-        
+        # The game specific data will be a 3-character string representing where the teams switch,
+        # scale, switch are located.  For example, "LRR" means your teams closest switch is on the
+        # left (as you look out onto the field from the drivers station).  The teams scale is on
+        # the right, and the switch furthest away is also on the right.
+        self.startingPosition = self.startSpotChooser.getSelected()
+        self.scaleDisable = self.scaleDisableChooser.getSelected()
         self.gameData = DriverStation.getInstance().getGameSpecificMessage()
 
-        self.crossFieldEnable = self.selectedCrossFieldEnable.getCrossFieldEnable()
-        self.scoringElement = self.selectedScoringElement.getScoringElement()        
-        self.startingPosition = self.selectedStartingPosition.getStartingPosition()
+        logger.info("Game Data: %s" % (self.gameData))
+        logger.info("Starting Position %s" % (self.startingPosition))
+        logger.info("Scale Enable %s" % (self.scaleDisable))
+        
+        self.autonCommand = self.chooserOptions[self.startingPosition][self.gameData[0]][self.gameData[1]][self.scaleDisable]['command'](self)
+        self.autonCommand.start()
 
     def autonomousPeriodic(self):
         """
         Periodic code for autonomous mode should go here.  This method will be called every 20ms.
         """
-        # The game specific data will be a 3-character string representing where the teams switch,
-        # scale, switch are located.  For example, "LRR" means your teams closest switch is on the
-        # left (as you look out onto the field from the drivers station).  The teams scale is on
-        # the right, and the switch furthest away is also on the right.
-        if self.scheduleAutonomous:
-            self.scheduleAutonomous = False
-            logger.info("Game Data: %s" % (self.gameData))
-            logger.info("Cross Field Enable: %s" % (self.crossFieldEnable))
-            logger.info("Scoring Element %s" % (self.scoringElement))
-            logger.info("Starting Position %s" % (self.startingPosition))    
-  
-            self.autonMiddleStartLeftSwitch.start()
-            #self.autonLeftStartLeftScale.start()
-            #self.autonForward.start()
-
-        
         Scheduler.getInstance().run()
 
     def teleopInit(self):

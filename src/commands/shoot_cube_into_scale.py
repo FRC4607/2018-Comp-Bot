@@ -18,8 +18,8 @@ class ShootCubeIntoScale(Command):
     def initialize(self):
         self.finished = False
         self.startTime = self.robot.timer.get()
-        self.robot.intakeMotors.rightTalon.setInverted(False)
-        self.robot.intakeMotors.leftTalon.setInverted(False)
+        self.robot.intakeMotors.rightTalon.setInverted(True)
+        self.robot.intakeMotors.leftTalon.setInverted(True)
         self.robot.intakeMotors.rightTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,
                                                INTAKE_OUT_SCALE)
         self.robot.intakeMotors.leftTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,

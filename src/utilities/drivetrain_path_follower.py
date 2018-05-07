@@ -1,34 +1,33 @@
 from wpilib.command import Command
 from utilities.drivetrain_mp_controller import DrivetrainMPController
-import os.path
-import pickle
 import logging
 from constants import LOGGER_LEVEL
 logger = logging.getLogger(__name__)
 logger.setLevel(LOGGER_LEVEL)
 
 
-class LeftStartLeftScalePathFollower(Command):
+class DrivetrainPathFollower(Command):
     """
-    This command will call the path which will go forward. The pickle file should have been
-    created on the PC and placed into the autonomous folder to be uploaded with the robot code.
+    This command will call the path which will go forward. The pickle file should have been created on the PC and placed into the autonomous folder
+    to be uploaded with the robot code.
     """
-    def __init__(self, robot):
+    def __init__(self, robot, path, reverse, pid_kludge=False):
         super().__init__()
         self.requires(robot.driveTrain)
-        # self.setInterruptible(False)
 
-        # Create references to the robot
+        # Create references to the robot and the path to follow
         self.robot = robot
-
-        # Read up the pickled path file
-        with open(os.path.join(os.path.dirname(__file__), 'left_start_left_scale_path.pickle'),
-                  "rb") as fp:
-            self.path = pickle.load(fp)
+        self.path = path
+        self.reverse = reverse
+        self.pidKludge = pid_kludge
 
         # Control variables
         self.finished = True
-        self._streamRate = int(self.path['left'][0][2] / 2)
+
+        # 4th value in MP's is sample period.  Assume the left and right sides are the same.  The
+        # divide by 2 value is used to set the Talon control frames and notifier to twice the rate
+        # of the trajectory duration.
+        self._streamRate = int(self.path['left'][0][3] / 2)
 
     def isFinished(self):
         """
@@ -43,10 +42,13 @@ class LeftStartLeftScalePathFollower(Command):
         """
         self.finished = False
         self.robot.driveTrain.initiaizeDrivetrainMotionProfileControllers(self._streamRate)
+        if self.pidKludge:
+            self.robot.driveTrain.pidKludge()
         self.pathFollower = DrivetrainMPController(self.robot.driveTrain.leftTalon,
                                                    self.path['left'],
                                                    self.robot.driveTrain.rightTalon,
                                                    self.path['right'],
+                                                   self.reverse,
                                                    self.robot.driveTrain.MP_SLOT0_SELECT,
                                                    self.robot.driveTrain.MP_SLOT1_SELECT)
         self.pathFollower.start()

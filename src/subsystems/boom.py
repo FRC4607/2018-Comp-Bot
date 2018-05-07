@@ -11,14 +11,17 @@ logger.setLevel(LOGGER_LEVEL)
 class Boom(Subsystem):
     """
     The boom subsystem is used by the operator and also the boom controller.  There is a pot
-    mounted to the linear actuator which will provide feeback for the boom controller.
+    mounted to the linear actuator which will provide feedback for the boom controller.
     """
 
     ENCODER_TICS_PER_REV = 102.4  # 10-turn analog pot on 10-bit ADC: 1024 / 10
-    POT_INTAKE_POSITION_DEG = 83 * (3600 / 1023)
+    POT_INTAKE_POSITION_DEG = 84 * (3600 / 1023)
     POT_SWITCH_POSITION_DEG = 348 * (3600 / 1023)  # ** TODO **
-    POT_SCALE_POSITION_DEG = 825 * (3600 / 1023)  # ** TODO **
-    POT_ERROR_LIMIT = 90.0
+    POT_SCALE_POSITION_DEG = 848 * (3600 / 1023)  # ** TODO **
+    POT_SCALE_POSITION = 825
+    POT_SCALE_UPPER_ERROR = 1005
+    POT_SCALE_LOWER_ERROR = 645
+    POT_ERROR_LIMIT = 360.0
     # FORWARD_SOFT_LIMIT = 840
     # REVERSE_SOFT_LIMIT = 90
 
