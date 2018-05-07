@@ -11,9 +11,8 @@ class AutonForward(CommandGroup):
         self.requires(robot.driveTrain)
 
         # Read up the pickled path file of trajectories
-        with open(os.path.join(os.path.dirname(__file__),
-                               'forward.pickle'), "rb") as fp:
-            path = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__), 'forward', 'path1.pickle'), "rb") as fp:
+            path1 = pickle.load(fp)
 
         # Add commands to run
-        self.addSequential(DrivetrainPathFollower(robot, path, False))
+        self.addSequential(DrivetrainPathFollower(robot, path1, False))

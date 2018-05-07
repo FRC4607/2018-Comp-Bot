@@ -34,105 +34,7 @@ def CalculateFeedForwardVoltage(leftSide, velocity, acceleration):
     return kV * velocity + kA * acceleration + VIntercept
 
 
-def GeneratePath(path_name, file_name, waypoints, settings, reverse=False, heading_overide=False, headingValue=0.0):
-    """
-    This function will take a set of pathfinder waypoints and create the trajectories to follow a path going through the waypoints.  This path is
-    specific for the drivetrain controllers, so the position will use the CTRE quadrature encoders and the velocity will use the feed-forward in
-    units of Volts.
-    """
-    # Generate the path using pathfinder.
-    info, trajectory = pf.generate(waypoints, settings.order, settings.samples, settings.period,
-                                   settings.maxVelocity, settings.maxAcceleration, settings.maxJerk)
-
-    # Modify the path for the differential drive based on the calibrated wheelbase
-    modifier = pf.modifiers.TankModifier(trajectory).modify(ROBOT_WHEELBASE_FT)
-
-    # Ge the left and right trajectories...left and right are reversed
-    rightTrajectory = modifier.getLeftTrajectory()
-    leftTrajectory = modifier.getRightTrajectory()
-
-    # Grab the position, velocity + acceleration for feed-forward, heading, and duration
-    path = {"left": [], "right": []}
-    headingOut = []
-    for i in range(len(leftTrajectory)):
-        if not reverse:
-            if heading_overide:
-                heading = headingValue
-            elif abs(pf.r2d(leftTrajectory[i].heading)) > 180:
-                heading = -(pf.r2d(leftTrajectory[i].heading) - 360)
-            else:
-                heading = -pf.r2d(leftTrajectory[i].heading)
-        else:
-            if heading_overide:
-                heading = headingValue
-            else:
-                heading = pf.r2d(leftTrajectory[i].heading) - 180
-
-        headingOut.append(heading)
-        path["left"].append([leftTrajectory[i].position * 4096 /                            # Position: CTRE SRX Mag encoder: 4096 units per rotation
-                             (ROBOT_WHEEL_DIAMETER_FT * math.pi),                           # Voltage / Feed-Forward
-                             CalculateFeedForwardVoltage(True,
-                                                         leftTrajectory[i].velocity,
-                                                         leftTrajectory[i].acceleration),
-                             heading / 360,                                                 # Pigeon IMU setup for 3600 units per rotation
-                             int(leftTrajectory[i].dt * 1000)])                             # Duration
-        path["right"].append([rightTrajectory[i].position * 4096 /
-                              (ROBOT_WHEEL_DIAMETER_FT * math.pi),
-                              CalculateFeedForwardVoltage(False,
-                                                          rightTrajectory[i].velocity,
-                                                          rightTrajectory[i].acceleration),
-                              heading / 360,
-                              int(rightTrajectory[i].dt * 1000)])
-
-    # Dump the path into a pickle file which will be read up later by the RoboRIO robot code
-    with open(os.path.join(path_name, file_name+".pickle"), "wb") as fp:
-        pickle.dump(path, fp)
-
-    # Plot the data for review
-    x = list(i * (settings.period) for i, _ in enumerate(leftTrajectory))
-
-    plt.figure()
-    # plt.plot(aspect=0.5)
-    plt.title("Trajectory")
-    drawField(plt)
-    plt.plot([segment.y for segment in leftTrajectory],
-             [segment.x for segment in leftTrajectory],
-             marker='.', color='b')
-    plt.plot([segment.y for segment in rightTrajectory],
-             [segment.x for segment in rightTrajectory],
-             marker='.', color='r')
-    plt.gca().set_yticks(np.arange(0, 30.1, 1.0), minor=True)
-    plt.gca().set_yticks(np.arange(0, 30.1, 3))
-    plt.gca().set_xticks(np.arange(0, 27.1, 1.0), minor=True)
-    plt.gca().set_xticks(np.arange(0, 27.1, 3))
-    plt.grid(which='minor', color='grey', linestyle='--', alpha=0.25)
-    plt.grid(which='major', color='grey', linestyle='-', alpha=0.75)
-
-    # Plot the heading
-    plt.figure()
-    plt.title("Heading")
-    plt.plot(x, headingOut, marker='.')
-
-    # Plot the velocity and acceleration and look for any discontinuities
-    plt.figure()
-    plt.subplot(2, 1, 1)
-    plt.title("Velocity")
-    plt.plot(x, [segment.velocity for segment in leftTrajectory], marker='.', color='b')
-    plt.plot(x, [segment.velocity for segment in rightTrajectory], marker='.', color='r')
-    plt.yticks(np.arange(0, DRIVETRAIN_MAX_VELOCITY + 0.1, 1.0))
-    plt.grid()
-    plt.subplot(2, 1, 2)
-    plt.title("Acceleration")
-    plt.plot(x, [segment.acceleration for segment in leftTrajectory], marker='.', color='b')
-    plt.plot(x, [segment.acceleration for segment in rightTrajectory], marker='.', color='r')
-    plt.yticks(np.arange(-DRIVETRAIN_MAX_ACCELERATION, DRIVETRAIN_MAX_ACCELERATION + 1.1, 2.0))
-    plt.grid()
-    plt.tight_layout()
-    plt.show()
-
-
-def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings, reverse=False,
-                                      heading_overide=False, headingValue=0.0):
+def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings, reverse=False, heading_override=False, heading_value=0.0):
     """
     This function will take a set of pathfinder waypoints and create the trajectories to follow a path going through the waypoints.  This path is
     specific for the drivetrain controllers, so the position will use the CTRE quadrature encoders, the velocity will use the feed-forward in
@@ -155,16 +57,14 @@ def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings,
     headings = {"left": [], "right": []}
     for i in range(len(leftTrajectory)):
         heading = pf.r2d(leftTrajectory[i].heading)
-        if heading_overide:
-            heading = headingValue
+        if heading_override:
+            heading = heading_value
         else:
             if not reverse:
                 if pf.r2d(leftTrajectory[i].heading) > 180:
                     heading = pf.r2d(leftTrajectory[i].heading) - 360
             else:
                     heading = -(pf.r2d(leftTrajectory[i].heading) - 180)
-            
-            
         headings["left"].append(heading)
         path["left"].append([leftTrajectory[i].position * 4096 /                            # Position: CTRE SRX Mag encoder: 4096 units per rotation
                              (ROBOT_WHEEL_DIAMETER_FT * math.pi),                           # Voltage / Feed-Forward
@@ -174,15 +74,14 @@ def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings,
                              3600 * heading / 360,                                          # Pigeon IMU setup for 3600 units per rotation
                              int(leftTrajectory[i].dt * 1000)])                             # Duration
         heading = pf.r2d(rightTrajectory[i].heading)
-        if heading_overide:
-            heading = headingValue
+        if heading_override:
+            heading = heading_value
         else:
             if not reverse:
                 if pf.r2d(rightTrajectory[i].heading) > 180:
                     heading = pf.r2d(rightTrajectory[i].heading) - 360
             else:
                     heading = -(pf.r2d(rightTrajectory[i].heading) - 180)
-
         headings["right"].append(heading)
         path["right"].append([rightTrajectory[i].position * 4096 /
                               (ROBOT_WHEEL_DIAMETER_FT * math.pi),
@@ -239,8 +138,8 @@ def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings,
     plt.tight_layout()
     plt.show()
 
-def GenerateMotionProfile(motion_profile_name, file_name, trajectory,
-                          position_units, velocity_units):
+
+def GenerateMotionProfile(motion_profile_name, file_name, trajectory, position_units, velocity_units):
     """
     This function will use the pathfinder to generate a single-axis motion profile.
     """

@@ -2,7 +2,7 @@ import os
 from collections import namedtuple
 import pathfinder as pf
 from utilities.functions import GenerateTalonMotionProfileArcPath
-from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, Y_WALL_TO_EXCHANGE_FAR
+from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, X_WALL_TO_SWITCH_NEAR
 
 PathFinderSettings = namedtuple("PathFinderSettings", ["order", "samples", "period", "maxVelocity", "maxAcceleration", "maxJerk"])
 settings = PathFinderSettings(order=pf.FIT_HERMITE_QUINTIC,
@@ -14,12 +14,13 @@ settings = PathFinderSettings(order=pf.FIT_HERMITE_QUINTIC,
 
 # The waypoints are entered as X, Y, and Theta.  +X is forward, +Y is left, and +Theta is measured from +X to +Y
 xOffset = 0.5 * X_ROBOT_LENGTH
-yOffset = -(Y_WALL_TO_EXCHANGE_FAR + 0.5 * Y_ROBOT_WIDTH)
+yOffset = -(0.5 * Y_ROBOT_WIDTH)
 
 waypoints = [
     pf.Waypoint(0, 0, 0),
-    pf.Waypoint(100 / 12, 64 / 12, 0),
+    pf.Waypoint(X_WALL_TO_SWITCH_NEAR, 0, 0),
 ]
+
 # This function will generate the path using pathfinder and then convert the output into Talon Motion Profile Arc inputs.
 #   path_name:        This is the file system path to where the pickled path file will be created
 #   file_name:        This is the file name of the pickled path file

@@ -17,21 +17,16 @@ class AutonMiddleStartRightSwitch(CommandGroup):
         self.requires(robot.driveTrain)
 
         # Read up the pickled path file of trajectories
-        with open(os.path.join(os.path.dirname(__file__),
-                               'middle_start_right_switch.pickle'), "rb") as fp:
-            path = pickle.load(fp)
-        with open(os.path.join(os.path.dirname(__file__),
-                               'right_switch_cube_retrieval.pickle'), "rb") as fp:
-            cubePosPath = pickle.load(fp)
-        with open(os.path.join(os.path.dirname(__file__),
-                               'right_cube_retrieval_cube_get.pickle'), "rb") as fp:
-            cubeGetPath = pickle.load(fp)
-        with open(os.path.join(os.path.dirname(__file__),
-                               'right_cube_get_switch_prep.pickle'), "rb") as fp:
-            cubeSwitchPrepPath = pickle.load(fp)
-        with open(os.path.join(os.path.dirname(__file__),
-                               'switch_prep_right_switch.pickle'), "rb") as fp:
-            cubeSwitchPath = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__), 'middle_start_right_switch', 'path1.pickle'), "rb") as fp:
+            path1 = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__), 'middle_start_right_switch', 'path2.pickle'), "rb") as fp:
+            path2 = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__), 'middle_start_right_switch', 'path3.pickle'), "rb") as fp:
+            path3 = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__), 'middle_start_right_switch', 'path4.pickle'), "rb") as fp:
+            path4 = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__), 'middle_start_right_switch', 'path5.pickle'), "rb") as fp:
+            path5 = pickle.load(fp)
 
         # Zero gyro and encoders
         robot.driveTrain.zeroGyro()
@@ -39,24 +34,24 @@ class AutonMiddleStartRightSwitch(CommandGroup):
 
         # Go to switch
         self.addParallel(BoomToSwitch(robot))
-        self.addSequential(DrivetrainPathFollower(robot, path, False))
+        self.addSequential(DrivetrainPathFollower(robot, path1, False))
         self.addParallel(ShootCubeIntoSwitch(robot))
- 
+
         # Go to cube retrieval position
         self.addParallel(BoomToIntake(robot))
         self.addParallel(OpenIntake(robot))
-        self.addSequential(DrivetrainPathFollower(robot, cubePosPath, True))
-  
+        self.addSequential(DrivetrainPathFollower(robot, path2, True))
+
         # Go to pick up the next cube
-        self.addSequential(DrivetrainPathFollower(robot, cubeGetPath, False, True))
+        self.addSequential(DrivetrainPathFollower(robot, path3, False, True))
         self.addParallel(StartIntake(robot))
         self.addParallel(CloseIntake(robot))
-   
+
         # Go back to start
         self.addParallel(BoomToSwitch(robot))
-        self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPrepPath, True))
-        
+        self.addSequential(DrivetrainPathFollower(robot, path4, True))
+
         # Go to switch
-        self.addSequential(DrivetrainPathFollower(robot, cubeSwitchPath, False, True))
+        self.addSequential(DrivetrainPathFollower(robot, path5, False, True))
         self.addSequential(ShootCubeIntoSwitch(robot))
 
