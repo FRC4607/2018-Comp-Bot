@@ -85,14 +85,14 @@ class Pitchfork(TimedRobot):
                                                 },
                                           },
                                "Right": {"R": {"R": {"No Scale": {'command': AutonRightStartRightSwitch},
-                                                     "Scale": {'command': AutonRightStartRightSwitch}
+                                                     "Scale": {'command': AutonRightStartRightScale}
                                                      },
                                                "L": {"No Scale": {'command': AutonRightStartRightSwitch},
                                                      "Scale": {'command': AutonRightStartRightSwitch}
                                                      },
                                                },
                                          "L": {"R": {"No Scale": {'command': AutonForward}, 
-                                                     "Scale": {'command': AutonForward}
+                                                     "Scale": {'command': AutonRightStartRightScale}
                                                      },
                                                "L": {"No Scale": {'command': AutonForward},
                                                      "Scale": {'command': AutonForward}

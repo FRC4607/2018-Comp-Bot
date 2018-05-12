@@ -3,7 +3,7 @@ import pickle
 from wpilib.command import CommandGroup
 from utilities.drivetrain_path_follower import DrivetrainPathFollower
 from commands.shoot_cube_into_scale import ShootCubeIntoScale
-from commands.boom_to_switch import BoomToScale
+from commands.boom_to_scale import BoomToScale
 from commands.boom_to_intake import BoomToIntake
 from commands.open_intake import OpenIntake
 from commands.close_intake import CloseIntake
