@@ -16,45 +16,53 @@ class AutonRightStartRightScale(CommandGroup):
         super().__init__()
         self.requires(robot.driveTrain)
 
-        # Read up the pickled path file
+        # Read up the pickled path file of trajectories
         with open(os.path.join(os.path.dirname(__file__), 'right_start_right_scale', 'path1.pickle'), "rb") as fp:
             path1 = pickle.load(fp)
         with open(os.path.join(os.path.dirname(__file__), 'right_start_right_scale', 'path2.pickle'), "rb") as fp:
             path2 = pickle.load(fp)        
         with open(os.path.join(os.path.dirname(__file__), 'right_start_right_scale', 'path3.pickle'), "rb") as fp:
             path3 = pickle.load(fp)
-        #===========================================================================================
-        # with open(os.path.join(os.path.dirname(__file__), 'right_start_right_scale', 'path4.pickle'), "rb") as fp:
-        #     path4 = pickle.load(fp)
+        with open(os.path.join(os.path.dirname(__file__), 'right_start_right_scale', 'path4.pickle'), "rb") as fp:
+            path4 = pickle.load(fp)
+        #=======================================================================
         # with open(os.path.join(os.path.dirname(__file__), 'right_start_right_scale', 'path5.pickle'), "rb") as fp:
         #     path5 = pickle.load(fp)            
-        #===========================================================================================
+        #=======================================================================
               
         # Zero gyro and encoders
         robot.driveTrain.zeroGyro()
         robot.driveTrain.zeroQuadratureEncoder()
-                        
+
         # Go to scale
         self.addSequential(DrivetrainPathFollower(robot, path1, False))
         self.addParallel(ShootCubeIntoScale(robot))
+
+        # Zero encoders
+        robot.driveTrain.zeroQuadratureEncoder()
 
         # Go to cube retrieval position
         self.addParallel(BoomToScale(robot))
         self.addSequential(DrivetrainPathFollower(robot, path2, True))
  
-        #===========================================================================================
-        # # Go to pick up the next cube
-        # self.addSequential(DrivetrainPathFollower(robot, path3, False))
-        # self.addParallel(StartIntake(robot))
-        # self.addParallel(CloseIntake(robot))
-        #===========================================================================================
-  
-  #=================================================================================================
-  #       # Go to scale / ready position
-  #       self.addParallel(BoomToSwitch(robot))
-  #       self.addSequential(DrivetrainPathFollower(robot, path4, False))
-  # 
-  #       # Go to scale
-  #       self.addSequential(DrivetrainPathFollower(robot, path5, False))
-  #       self.addSequential(ShootCubeIntoScaleS(robot))
-  #=================================================================================================
+        # Zero encoders
+        robot.driveTrain.zeroQuadratureEncoder()
+ 
+        # Go to pick up the next cube
+        self.addSequential(DrivetrainPathFollower(robot, path3, False))
+        self.addParallel(StartIntake(robot))
+        self.addParallel(CloseIntake(robot))
+ 
+        # Zero encoders
+        robot.driveTrain.zeroQuadratureEncoder()
+ 
+        # Go to scale / ready position
+        self.addParallel(BoomToScale(robot))
+        self.addSequential(DrivetrainPathFollower(robot, path4, True))
+        self.addSequential(ShootCubeIntoScale(robot))
+   
+        #=======================================================================
+        # # Go to scale
+        # self.addSequential(DrivetrainPathFollower(robot, path5, False))
+        # self.addSequential(ShootCubeIntoScaleS(robot))
+        #=======================================================================

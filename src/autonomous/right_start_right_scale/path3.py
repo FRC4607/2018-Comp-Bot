@@ -17,8 +17,8 @@ xOffset = 0.5 * X_ROBOT_LENGTH
 yOffset = -(27 - (Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH))
 
 waypoints = [
-     pf.Waypoint(0, 0, 0),
-     pf.Waypoint(72 / 12, 24 / 12, pf.d2r(45.0)),
+     pf.Waypoint(0, 0, pf.d2r(115.0)),
+     pf.Waypoint(-18 / 12, 36 / 12 , pf.d2r(140.0)),
 ]
 # This function will generate the path using pathfinder and then convert the output into Talon Motion Profile Arc inputs.
 #   path_name:        This is the file system path to where the pickled path file will be created
