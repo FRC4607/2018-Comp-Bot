@@ -21,6 +21,7 @@ class DrivetrainMPController():
     NOTIFIER_DEBUG_CNT = 100
     MIN_NUM_POINTS = 5
     NUM_LOOPS_TIMEOUT = 15
+    LEFT_DELAY_POINTS = 0
 
     def __init__(self, left_talon, left_points, right_talon, right_points, reverse, profile_slot_select0, profile_slot_select1):
 
@@ -213,15 +214,37 @@ class DrivetrainMPController():
         drive backwards, then use negative postion target and negative velocity/FF.  The closed loop postion values will be zero'd out at the
         beginning of each path.  This does not include the zero'ing of the gyro.
         """
-        for i in range(len(self._leftPoints)):
-            point = TrajectoryPoint(-self._leftPoints[i][0] if self.reverse else self._leftPoints[i][0],    # Position
-                                    -self._leftPoints[i][1] if self.reverse else self._leftPoints[i][1],    # Velocity / Feed-Forward
-                                    self._leftPoints[i][2],                                                 # Heading
+        
+        for i in range(self.LEFT_DELAY_POINTS):
+            point = TrajectoryPoint(0.0,                                                                    # Position
+                                    0.0,                                                                    # Velocity / Feed-Forward
+                                    self._leftPoints[0][2],                                                 # Heading
                                     self._profileSlotSelect0,                                               # PID0 slot index
                                     self._profileSlotSelect1,                                               # PID0 slot index
-                                    True if i+1 == len(self._leftPoints) else False,                        # Last point flag
-                                    True if i == 0 else False,                                              # Zero postion flag
+                                    False,                                                                  # Last point flag
+                                    True if i == 0 else False,                                              # Zero position flag
                                     self._getTrajectoryDuration(self._leftPoints[i][3]))                    # Duration
+            self._leftTalon.pushMotionProfileTrajectory(point)                                              # Push the trajectory point (top buffer)
+        
+        for i in range(len(self._leftPoints)):
+            if self.LEFT_DELAY_POINTS != 0:
+                point = TrajectoryPoint(-self._leftPoints[i][0] if self.reverse else self._leftPoints[i][0],    # Position
+                                        -self._leftPoints[i][1] if self.reverse else self._leftPoints[i][1],    # Velocity / Feed-Forward
+                                        self._leftPoints[i][2],                                                 # Heading
+                                        self._profileSlotSelect0,                                               # PID0 slot index
+                                        self._profileSlotSelect1,                                               # PID0 slot index
+                                        True if i+1 == len(self._leftPoints) else False,                        # Last point flag
+                                        False,                                                                  # Zero position flag
+                                        self._getTrajectoryDuration(self._leftPoints[i][3]))                    # Duration                
+            else:
+                point = TrajectoryPoint(-self._leftPoints[i][0] if self.reverse else self._leftPoints[i][0],    # Position
+                                        -self._leftPoints[i][1] if self.reverse else self._leftPoints[i][1],    # Velocity / Feed-Forward
+                                        self._leftPoints[i][2],                                                 # Heading
+                                        self._profileSlotSelect0,                                               # PID0 slot index
+                                        self._profileSlotSelect1,                                               # PID0 slot index
+                                        True if i+1 == len(self._leftPoints) else False,                        # Last point flag
+                                        True if i == 0 else False,                                              # Zero position flag
+                                        self._getTrajectoryDuration(self._leftPoints[i][3]))                    # Duration
             self._leftTalon.pushMotionProfileTrajectory(point)                                              # Push the trajectory point (top buffer)
             point = TrajectoryPoint(-self._rightPoints[i][0] if self.reverse else self._rightPoints[i][0],
                                     -self._rightPoints[i][1] if self.reverse else self._rightPoints[i][1],

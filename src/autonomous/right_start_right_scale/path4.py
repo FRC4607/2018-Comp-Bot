@@ -17,8 +17,8 @@ xOffset = 0.5 * X_ROBOT_LENGTH
 yOffset = -(27 - (Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH))
 
 waypoints = [
-     pf.Waypoint(xOffset,                         yOffset, 0),
-     pf.Waypoint(xOffset,                         yOffset, 0),
+     pf.Waypoint(0, 0, pf.d2r(140.0)),
+     pf.Waypoint(108 / 12, 42/12 , pf.d2r(90.0)),
 ]
 # This function will generate the path using pathfinder and then convert the output into Talon Motion Profile Arc inputs.
 #   path_name:        This is the file system path to where the pickled path file will be created
@@ -28,4 +28,4 @@ waypoints = [
 #   reverse:          This boolean flag will tell the function that the robot will follow this path goin backwards
 #   heading_override: This boolean flag will tell the function to ignore the heading values of pathfinder
 #   heading_value:    This is used in conjunction with heading_override and defines the heading value to use in lieu of pathfinder's
-GenerateTalonMotionProfileArcPath(os.path.dirname(__file__), "path4", waypoints, settings)
+GenerateTalonMotionProfileArcPath(os.path.dirname(__file__), "path4", waypoints, settings, True)

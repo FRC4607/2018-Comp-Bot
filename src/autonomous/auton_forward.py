@@ -14,5 +14,9 @@ class AutonForward(CommandGroup):
         with open(os.path.join(os.path.dirname(__file__), 'forward', 'path1.pickle'), "rb") as fp:
             path1 = pickle.load(fp)
 
+        # Zero gyro and encoders
+        robot.driveTrain.zeroGyro()
+        robot.driveTrain.zeroQuadratureEncoder()
+
         # Add commands to run
         self.addSequential(DrivetrainPathFollower(robot, path1, False))

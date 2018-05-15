@@ -17,25 +17,27 @@ ROBOT_WHEEL_DIAMETER_FT = 0.5  # ***** TODO *****
 """
 DRIVETRAIN MEASUREMENTS
 """
+# Practice drivetrain
+DRIVETRAIN_RIGHT_KV = 0.9478                # V / ft / s
+DRIVETRAIN_RIGHT_KA = 0.2251                # V / ft / s^2
+DRIVETRAIN_RIGHT_V_INTERCEPT = 1.0913       # V
+DRIVETRAIN_LEFT_KV = 1.0641                 # V / ft / s
+DRIVETRAIN_LEFT_KA = 0.1961                 # V / ft / s^2
+DRIVETRAIN_LEFT_V_INTERCEPT = 0.9611        # V
+DRIVETRAIN_MAX_VELOCITY = 10.0              # ft / s
+DRIVETRAIN_MAX_ACCELERATION = 14.5          # ft / s^2
+
+# comp bot drivetrain
 #===================================================================================================
 # DRIVETRAIN_RIGHT_KV = 0.9478                # V / ft / s
 # DRIVETRAIN_RIGHT_KA = 0.2251                # V / ft / s^2
 # DRIVETRAIN_RIGHT_V_INTERCEPT = 1.0913       # V
-# DRIVETRAIN_LEFT_KV = 1.0641                 # V / ft / s
-# DRIVETRAIN_LEFT_KA = 0.1961                 # V / ft / s^2
-# DRIVETRAIN_LEFT_V_INTERCEPT = 0.9611        # V
+# DRIVETRAIN_LEFT_KV = 0.9478                 # V / ft / s
+# DRIVETRAIN_LEFT_KA = 0.2251                 # V / ft / s^2
+# DRIVETRAIN_LEFT_V_INTERCEPT = 1.0913        # V
 # DRIVETRAIN_MAX_VELOCITY = 10.0              # ft / s
 # DRIVETRAIN_MAX_ACCELERATION = 14.5          # ft / s^2
 #===================================================================================================
-
-DRIVETRAIN_RIGHT_KV = 0.9478                # V / ft / s
-DRIVETRAIN_RIGHT_KA = 0.2251                # V / ft / s^2
-DRIVETRAIN_RIGHT_V_INTERCEPT = 1.0913       # V
-DRIVETRAIN_LEFT_KV = 0.9478                 # V / ft / s
-DRIVETRAIN_LEFT_KA = 0.2251                 # V / ft / s^2
-DRIVETRAIN_LEFT_V_INTERCEPT = 1.0913        # V
-DRIVETRAIN_MAX_VELOCITY = 10.0              # ft / s
-DRIVETRAIN_MAX_ACCELERATION = 14.5          # ft / s^2
 
 
 """
@@ -92,7 +94,7 @@ DRIVETRAIN_FRONT_LEFT_MOTOR = 2
 DRIVETRAIN_FRONT_RIGHT_MOTOR = 14
 DRIVETRAIN_REAR_LEFT_MOTOR = 10
 DRIVETRAIN_REAR_RIGHT_MOTOR = 13
-DRIVETRAIN_PIGEON = 3
+DRIVETRAIN_PIGEON = 15
 
 # Intake
 INTAKE_LEFT_MOTOR = 4

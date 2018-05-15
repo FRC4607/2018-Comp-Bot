@@ -58,14 +58,14 @@ class Pitchfork(TimedRobot):
                                                     "Scale": {'command': AutonForward}
                                                     },
                                               "L": {"No Scale": {'command': AutonForward},
-                                                    "Scale": {'command': AutonForward}
+                                                    "Scale": {'command': AutonLeftStartLeftScale}
                                                     },
                                               },
                                         "L": {"R": {"No Scale": {'command': AutonLeftStartLeftSwitch},
                                                     "Scale": {'command': AutonLeftStartLeftSwitch}
                                                     },
                                               "L": {"No Scale": {'command': AutonLeftStartLeftSwitch},
-                                                    "Scale": {'command': AutonLeftStartLeftSwitch}
+                                                    "Scale": {'command': AutonLeftStartLeftScale}
                                                     },
                                               },
                                         },

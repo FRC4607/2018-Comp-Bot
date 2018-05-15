@@ -64,7 +64,10 @@ def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings,
                 if pf.r2d(leftTrajectory[i].heading) > 180:
                     heading = pf.r2d(leftTrajectory[i].heading) - 360
             else:
+                if pf.r2d(leftTrajectory[i].heading) >= 180:
                     heading = -(pf.r2d(leftTrajectory[i].heading) - 180)
+                else:
+                    heading = -pf.r2d(leftTrajectory[i].heading) - 180
         headings["left"].append(heading)
         path["left"].append([leftTrajectory[i].position * 4096 /                            # Position: CTRE SRX Mag encoder: 4096 units per rotation
                              (ROBOT_WHEEL_DIAMETER_FT * math.pi),                           # Voltage / Feed-Forward
@@ -81,7 +84,11 @@ def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings,
                 if pf.r2d(rightTrajectory[i].heading) > 180:
                     heading = pf.r2d(rightTrajectory[i].heading) - 360
             else:
+                if pf.r2d(rightTrajectory[i].heading) >= 180:
                     heading = -(pf.r2d(rightTrajectory[i].heading) - 180)
+                else:
+                    heading = -pf.r2d(rightTrajectory[i].heading) - 180
+                        
         headings["right"].append(heading)
         path["right"].append([rightTrajectory[i].position * 4096 /
                               (ROBOT_WHEEL_DIAMETER_FT * math.pi),

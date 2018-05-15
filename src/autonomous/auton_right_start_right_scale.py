@@ -42,10 +42,12 @@ class AutonRightStartRightScale(CommandGroup):
         self.addParallel(BoomToScale(robot))
         self.addSequential(DrivetrainPathFollower(robot, path2, True))
  
-        # Go to pick up the next cube
-        self.addSequential(DrivetrainPathFollower(robot, path3, False))
-        self.addParallel(StartIntake(robot))
-        self.addParallel(CloseIntake(robot))
+        #===========================================================================================
+        # # Go to pick up the next cube
+        # self.addSequential(DrivetrainPathFollower(robot, path3, False))
+        # self.addParallel(StartIntake(robot))
+        # self.addParallel(CloseIntake(robot))
+        #===========================================================================================
   
   #=================================================================================================
   #       # Go to scale / ready position
