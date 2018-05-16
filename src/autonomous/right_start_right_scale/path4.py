@@ -5,10 +5,10 @@ from utilities.functions import GenerateTalonMotionProfileArcPath
 from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, X_WALL_TO_SWITCH_FAR, X_WALL_TO_SCALE_NEAR, Y_WALL_TO_START, Y_WALL_TO_SCALE_FAR
 
 PathFinderSettings = namedtuple("PathFinderSettings", ["order", "samples", "period", "maxVelocity", "maxAcceleration", "maxJerk"])
-settings = PathFinderSettings(order=pf.FIT_HERMITE_QUINTIC,
+settings = PathFinderSettings(order=pf.FIT_HERMITE_CUBIC,
                               samples=1000000,
                               period=0.01,
-                              maxVelocity=7.0,
+                              maxVelocity=5.0,
                               maxAcceleration=10,
                               maxJerk=30)
 

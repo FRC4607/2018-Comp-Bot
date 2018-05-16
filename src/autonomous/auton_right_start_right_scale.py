@@ -42,7 +42,7 @@ class AutonRightStartRightScale(CommandGroup):
         robot.driveTrain.zeroQuadratureEncoder()
 
         # Go to cube retrieval position
-        self.addParallel(BoomToScale(robot))
+        self.addParallel(BoomToIntake(robot))
         self.addSequential(DrivetrainPathFollower(robot, path2, True))
  
         # Zero encoders

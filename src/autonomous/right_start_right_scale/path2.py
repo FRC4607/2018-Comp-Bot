@@ -5,10 +5,10 @@ from utilities.functions import GenerateTalonMotionProfileArcPath
 from constants import X_ROBOT_LENGTH, Y_ROBOT_WIDTH, X_WALL_TO_SWITCH_FAR, X_WALL_TO_SCALE_NEAR, Y_WALL_TO_START, Y_WALL_TO_SCALE_FAR
 
 PathFinderSettings = namedtuple("PathFinderSettings", ["order", "samples", "period", "maxVelocity", "maxAcceleration", "maxJerk"])
-settings = PathFinderSettings(order=pf.FIT_HERMITE_QUINTIC,
+settings = PathFinderSettings(order=pf.FIT_HERMITE_CUBIC,
                               samples=1000000,
                               period=0.01,
-                              maxVelocity=5.0,
+                              maxVelocity=3.5,
                               maxAcceleration=10,
                               maxJerk=30)
 
@@ -17,7 +17,7 @@ xOffset = 0.5 * X_ROBOT_LENGTH
 yOffset = -(27 - (Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH))
 
 waypoints = [
-     pf.Waypoint(0, 0, pf.d2r(20.0)),
+     pf.Waypoint(0, 0, pf.d2r(-20.0)),
      pf.Waypoint(-36 / 12, 36 / 12, pf.d2r(-115.0)),
 ]
 # This function will generate the path using pathfinder and then convert the output into Talon Motion Profile Arc inputs.
