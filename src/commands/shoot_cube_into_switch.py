@@ -1,6 +1,6 @@
 from wpilib.command import Command
 from ctre.wpi_talonsrx import WPI_TalonSRX
-from constants import INTAKE_OUT_SWITCH_FAST
+from constants import INTAKE_OUT_SWITCH_FAST, INTAKE_DELAY
 import logging
 from constants import LOGGER_LEVEL
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ class ShootCubeIntoSwitch(Command):
         self.robot.intakeMotors.leftTalon.setInverted(True)
         self.robot.intakeMotors.rightTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,
                                                INTAKE_OUT_SWITCH_FAST)
+        self.robot.timer.delay(INTAKE_DELAY)              
         self.robot.intakeMotors.leftTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,
                                               INTAKE_OUT_SWITCH_FAST)
 

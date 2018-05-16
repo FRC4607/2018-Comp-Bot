@@ -1,6 +1,6 @@
 from wpilib.command import Command
 from ctre.wpi_talonsrx import WPI_TalonSRX
-from constants import LOGGER_LEVEL
+from constants import LOGGER_LEVEL, INTAKE_DELAY
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(LOGGER_LEVEL)
@@ -17,13 +17,21 @@ class IntakeMotorsOut(Command):
         self.robot = robot
         self.motorSpeed = motor_speed
 
-    def execute(self):
+    def initialize(self):
+        self.robot.intakeMotors.leftTalon.setInverted(True)        
         self.robot.intakeMotors.rightTalon.setInverted(True)
-        self.robot.intakeMotors.leftTalon.setInverted(True)
+        self.robot.intakeMotors.rightTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,
+                                              self.motorSpeed)
+        self.robot.timer.delay(INTAKE_DELAY)        
+        self.robot.intakeMotors.leftTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,
+                                               self.motorSpeed)
+
+    def execute(self):
+        self.robot.intakeMotors.leftTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,
+                                              self.motorSpeed)        
         self.robot.intakeMotors.rightTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,
                                                self.motorSpeed)
-        self.robot.intakeMotors.leftTalon.set(WPI_TalonSRX.ControlMode.PercentOutput,
-                                              self.motorSpeed)
+
 
     def end(self):
         self.robot.intakeMotors.rightTalon.set(WPI_TalonSRX.ControlMode.PercentOutput, 0.0)

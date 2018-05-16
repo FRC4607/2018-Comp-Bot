@@ -39,8 +39,8 @@ class AutonMiddleStartRightSwitch(CommandGroup):
 
         # Go to cube retrieval position
         self.addParallel(BoomToIntake(robot))
-        self.addParallel(OpenIntake(robot))
         self.addSequential(DrivetrainPathFollower(robot, path2, True))
+        self.addParallel(OpenIntake(robot))        
 
         # Go to pick up the next cube
         self.addSequential(DrivetrainPathFollower(robot, path3, False, True))
@@ -54,4 +54,3 @@ class AutonMiddleStartRightSwitch(CommandGroup):
         # Go to switch
         self.addSequential(DrivetrainPathFollower(robot, path5, False, True))
         self.addSequential(ShootCubeIntoSwitch(robot))
-

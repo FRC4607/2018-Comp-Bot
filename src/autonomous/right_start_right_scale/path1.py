@@ -8,7 +8,7 @@ PathFinderSettings = namedtuple("PathFinderSettings", ["order", "samples", "peri
 settings = PathFinderSettings(order=pf.FIT_HERMITE_QUINTIC,
                               samples=1000000,
                               period=0.01,
-                              maxVelocity=7.0,
+                              maxVelocity=6.0,
                               maxAcceleration=10,
                               maxJerk=30)
 

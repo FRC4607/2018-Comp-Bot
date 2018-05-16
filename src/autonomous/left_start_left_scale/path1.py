@@ -8,9 +8,9 @@ PathFinderSettings = namedtuple("PathFinderSettings", ["order", "samples", "peri
 settings = PathFinderSettings(order=pf.FIT_HERMITE_QUINTIC,
                               samples=1000000,
                               period=0.01,
-                              maxVelocity=8.5,
+                              maxVelocity=7.0,
                               maxAcceleration=12,
-                              maxJerk=60)
+                              maxJerk=40)
 
 # The waypoints are entered as X, Y, and Theta.  +X is forward, +Y is left, and +Theta is measured from +X to +Y
 xOffset = 0.5 * X_ROBOT_LENGTH
@@ -19,7 +19,7 @@ yOffset = -(Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH)
 waypoints = [
      pf.Waypoint(xOffset,                         yOffset, 0),
      pf.Waypoint(X_WALL_TO_SWITCH_FAR - xOffset,  yOffset, 0),
-     pf.Waypoint(X_WALL_TO_SCALE_NEAR - xOffset, -Y_WALL_TO_SCALE_NEAR + 12/12, pf.d2r(-20.0)),
+     pf.Waypoint(X_WALL_TO_SCALE_NEAR - xOffset + 12/12, -Y_WALL_TO_SCALE_NEAR - 0.5, pf.d2r(-20.0)),
 ]
 # This function will generate the path using pathfinder and then convert the output into Talon Motion Profile Arc inputs.
 #   path_name:        This is the file system path to where the pickled path file will be created
