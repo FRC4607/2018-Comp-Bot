@@ -14,7 +14,7 @@ settings = PathFinderSettings(order=pf.FIT_HERMITE_QUINTIC,
 
 # The waypoints are entered as X, Y, and Theta.  +X is forward, +Y is left, and +Theta is measured from +X to +Y
 xOffset = 0.5 * X_ROBOT_LENGTH
-yOffset = -(Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH)
+yOffset = -(Y_WALL_TO_START + 0.25 * Y_ROBOT_WIDTH) # yOffset = -(Y_WALL_TO_START + 0.5 * Y_ROBOT_WIDTH)
 
 waypoints = [
      pf.Waypoint(xOffset,                         yOffset, 0),

@@ -22,10 +22,10 @@ class SwitchAutoBoomToIntake(Command):
         # Read up the pickled path file.  The intake-to-switch and intake-to-scale motion profiles
         # are symetric, so it should be good for using here.
         with open(os.path.join(os.path.dirname(__file__),
-                               'switch_auto_boom_intake_to_switch.pickle'), "rb") as fp:
+                               'boom_intake_to_switch.pickle'), "rb") as fp:
             self.intakeToSwitchPath = pickle.load(fp)
         with open(os.path.join(os.path.dirname(__file__),
-                               'switch_auto_boom_intake_to_scale.pickle'), "rb") as fp:
+                               'boom_intake_to_scale.pickle'), "rb") as fp:
             self.intakeToScalePath = pickle.load(fp)
 
     def initialize(self):
