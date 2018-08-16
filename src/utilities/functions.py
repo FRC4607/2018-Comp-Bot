@@ -47,7 +47,7 @@ def GenerateTalonMotionProfileArcPath(path_name, file_name, waypoints, settings,
     # Modify the path for the differential drive based on the calibrated wheelbase
     modifier = pf.modifiers.TankModifier(trajectory).modify(ROBOT_WHEELBASE_FT)
 
-    # Ge the left and right trajectories
+    # Get the left and right trajectories
     leftTrajectory = modifier.getLeftTrajectory()
     rightTrajectory = modifier.getRightTrajectory()
 
