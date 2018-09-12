@@ -194,6 +194,46 @@ def GenerateMotionProfile(motion_profile_name, file_name, trajectory, position_u
     plt.show()
 
 
+#===============================================================================
+# def PathAppender(first_path, second_path, reverse=False):
+# 
+#     if reverse:
+#         for i in range(len(second_path['left'])):    
+#             second_path['left'][i][0] = -second_path['left'][i][0]
+#             second_path['left'][i][1] = -second_path['left'][i][1] 
+#               
+#         for i in range(len(second_path['right'])):    
+#             second_path['right'][i][0] = -second_path['right'][i][0]    
+#             second_path['right'][i][1] = -second_path['right'][i][1]    
+#     
+#     for i in range(len(first_path['left'])):    
+#         lastPoint = first_path['left'][-1][0]      
+#         lastHeading = first_path['left'][-1][2]
+#      
+#     for i in range(len(second_path['left'])):
+#         firstPoint = second_path['left'][0][2]
+#          
+#     for i in range(len(second_path['left'])):    
+#         second_path['left'][i][0] = second_path['left'][i][0] + lastPoint  
+#         second_path['left'][i][2] = second_path['left'][i][2] - firstPoint + lastHeading
+#          
+#     for i in range(len(first_path['right'])):    
+#         lastPoint = first_path['right'][-1][0]      
+#         lastHeading = first_path['right'][-1][2]
+#      
+#     for i in range(len(second_path['right'])):
+#         firstPoint = second_path['right'][0][2]
+#          
+#     for i in range(len(second_path['right'])):    
+#         second_path['right'][i][0] = second_path['right'][i][0] + lastPoint  
+#         second_path['right'][i][2] = second_path['right'][i][2] - firstPoint + lastHeading 
+#          
+#     for key in second_path:
+#        for data in (second_path[key]):       
+#            first_path[key].append(data)
+#===============================================================================
+
+
 def drawField(plt):
     # Add in the null zone lines
     plt.plot([0, Y_WALL_TO_NULL_ZONE],

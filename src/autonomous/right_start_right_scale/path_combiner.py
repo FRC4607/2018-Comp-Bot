@@ -2,7 +2,6 @@ import os
 import pickle
 from wpilib.command import CommandGroup
 
-
 with open(os.path.join(os.path.dirname(__file__), 'path.pickle'), "rb") as fp:
     path = pickle.load(fp)          
 with open(os.path.join(os.path.dirname(__file__), 'path1.pickle'), "rb") as fp:
@@ -13,48 +12,56 @@ with open(os.path.join(os.path.dirname(__file__), 'path3.pickle'), "rb") as fp:
     path3 = pickle.load(fp)
 with open(os.path.join(os.path.dirname(__file__), 'path4.pickle'), "rb") as fp:
     path4 = pickle.load(fp)  
-    
-        
-for i in range(len(path2['left'])):    
-    path2['left'][i][0] = -path2['left'][i][0]
-    path2['left'][i][1] = -path2['left'][i][1] 
+
+
+def PathAppender(first_path, second_path, reverse=False):
+ 
+    if reverse:
+        for i in range(len(second_path['left'])):    
+            second_path['left'][i][0] = -second_path['left'][i][0]
+            second_path['left'][i][1] = -second_path['left'][i][1] 
+               
+        for i in range(len(second_path['right'])):    
+            second_path['right'][i][0] = -second_path['right'][i][0]    
+            second_path['right'][i][1] = -second_path['right'][i][1]    
      
-for i in range(len(path2['right'])):    
-    path2['right'][i][0] = -path2['right'][i][0]    
-    path2['right'][i][1] = -path2['right'][i][1]
-     
-for i in range(len(path4['left'])):    
-    path4['left'][i][0] = -path4['left'][i][0]
-    path4['left'][i][1] = -path4['left'][i][1] 
-     
-for i in range(len(path4['right'])):    
-    path4['right'][i][0] = -path4['right'][i][0]    
-    path4['right'][i][1] = -path4['right'][i][1]    
+    for i in range(len(first_path['left'])):    
+        lastPoint = first_path['left'][-1][0]      
+        lastHeading = first_path['left'][-1][2]
       
-for key in path2:
-    for data in (path2[key]):       
-        path1[key].append(data)
+    for i in range(len(second_path['left'])):
+        firstPoint = second_path['left'][0][2]
+          
+    for i in range(len(second_path['left'])):    
+        second_path['left'][i][0] = second_path['left'][i][0] + lastPoint  
+        second_path['left'][i][2] = second_path['left'][i][2] - firstPoint + lastHeading
+          
+    for i in range(len(first_path['right'])):    
+        lastPoint = first_path['right'][-1][0]      
+        lastHeading = first_path['right'][-1][2]
+      
+    for i in range(len(second_path['right'])):
+        firstPoint = second_path['right'][0][2]
+          
+    for i in range(len(second_path['right'])):    
+        second_path['right'][i][0] = second_path['right'][i][0] + lastPoint  
+        second_path['right'][i][2] = second_path['right'][i][2] - firstPoint + lastHeading 
+          
+    for key in second_path:
+       for data in (second_path[key]):       
+           first_path[key].append(data)
+
+
+
+
+PathAppender(path1, path2, True)   
+PathAppender(path1, path3)
+PathAppender(path1, path4, True)
 
 for key in path1:
     for data in (path1[key]):
         print(data)
-        
-for key in path3:
-    for data in (path3[key]):       
-        path1[key].append(data)
 
-for key in path4:
-    for data in (path4[key]):         
-        path1[key].append(data)         
-       
 with open(os.path.join(os.path.dirname(__file__), "best_path.pickle"), "wb") as fp:
-    pickle.dump(path1, fp)  
-with open(os.path.join(os.path.dirname(__file__), "best_path.pickle"), "rb") as fp:
-    bestPath = pickle.load(fp)         
-       
- 
-#===============================================================================
-# for key in bestPath:
-#     for data in (bestPath[key]):     
-#         print(data)   
-#===============================================================================
+    pickle.dump(path1, fp)
+           
