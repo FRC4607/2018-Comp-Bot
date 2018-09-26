@@ -32,25 +32,27 @@ class AutonMiddleStartRightSwitch(CommandGroup):
         robot.driveTrain.zeroGyro()
         robot.driveTrain.zeroQuadratureEncoder()
 
-        # Go to switch
-        self.addParallel(BoomToSwitch(robot))
-        self.addSequential(DrivetrainPathFollower(robot, path1, False))
-        self.addParallel(ShootCubeIntoSwitch(robot))
+        (DrivetrainPathFollower(robot, path1, False)
 
-        # Go to cube retrieval position
-        self.addSequential(DrivetrainPathFollower(robot, path2, True))
-        self.addParallel(BoomToIntake(robot))
-        self.addParallel(OpenIntake(robot))        
+        ## Go to switch
+        #self.addParallel(BoomToSwitch(robot))
+        #self.addSequential(DrivetrainPathFollower(robot, path1, False))
+        #self.addParallel(ShootCubeIntoSwitch(robot))
 
-        # Go to pick up the next cube
-        self.addSequential(DrivetrainPathFollower(robot, path3, False, True))
-        self.addParallel(StartIntake(robot))
-        self.addParallel(CloseIntake(robot))
+        ## Go to cube retrieval position
+        #self.addSequential(DrivetrainPathFollower(robot, path2, True))
+        #self.addParallel(BoomToIntake(robot))
+        #self.addParallel(OpenIntake(robot))        
 
-        # Go back to start
-        self.addParallel(BoomToSwitch(robot))
-        self.addSequential(DrivetrainPathFollower(robot, path4, True))
+        ## Go to pick up the next cube
+        #self.addSequential(DrivetrainPathFollower(robot, path3, False, True))
+        #self.addParallel(StartIntake(robot))
+        #self.addParallel(CloseIntake(robot))
 
-        # Go to switch
-        self.addSequential(DrivetrainPathFollower(robot, path5, False, True))
-        self.addSequential(ShootCubeIntoSwitch(robot))
+        ## Go back to start
+        #self.addParallel(BoomToSwitch(robot))
+        #self.addSequential(DrivetrainPathFollower(robot, path4, True))
+
+        ## Go to switch
+        #self.addSequential(DrivetrainPathFollower(robot, path5, False, True))
+        #self.addSequential(ShootCubeIntoSwitch(robot))

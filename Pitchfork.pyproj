@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{d2d85758-f4c5-4257-9241-70c3928086d7}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile />
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src\autonomous\auton_forward.py" />
+    <Compile Include="src\autonomous\auton_left_start_left_scale.py" />
+    <Compile Include="src\autonomous\auton_left_start_left_switch.py" />
+    <Compile Include="src\autonomous\auton_middle_start_left_switch.py" />
+    <Compile Include="src\autonomous\auton_middle_start_right_switch.py" />
+    <Compile Include="src\autonomous\auton_right_start_right_scale.py" />
+    <Compile Include="src\autonomous\auton_right_start_right_switch.py" />
+    <Compile Include="src\autonomous\forward\path1.py" />
+    <Compile Include="src\autonomous\forward\__init__.py" />
+    <Compile Include="src\autonomous\left_start_left_scale\path1.py" />
+    <Compile Include="src\autonomous\left_start_left_scale\path2.py" />
+    <Compile Include="src\autonomous\left_start_left_scale\path3.py" />
+    <Compile Include="src\autonomous\left_start_left_scale\path4.py" />
+    <Compile Include="src\autonomous\left_start_left_scale\path5.py" />
+    <Compile Include="src\autonomous\left_start_left_scale\__init__.py" />
+    <Compile Include="src\autonomous\left_start_left_switch\path1.py" />
+    <Compile Include="src\autonomous\left_start_left_switch\__init__.py" />
+    <Compile Include="src\autonomous\middle_start_left_switch\path1.py" />
+    <Compile Include="src\autonomous\middle_start_left_switch\path2.py" />
+    <Compile Include="src\autonomous\middle_start_left_switch\path3.py" />
+    <Compile Include="src\autonomous\middle_start_left_switch\path4.py" />
+    <Compile Include="src\autonomous\middle_start_left_switch\path5.py" />
+    <Compile Include="src\autonomous\middle_start_left_switch\__init__.py" />
+    <Compile Include="src\autonomous\middle_start_right_switch\path1.py" />
+    <Compile Include="src\autonomous\middle_start_right_switch\path2.py" />
+    <Compile Include="src\autonomous\middle_start_right_switch\path3.py" />
+    <Compile Include="src\autonomous\middle_start_right_switch\path4.py" />
+    <Compile Include="src\autonomous\middle_start_right_switch\path5.py" />
+    <Compile Include="src\autonomous\middle_start_right_switch\path_combiner.py" />
+    <Compile Include="src\autonomous\middle_start_right_switch\__init__.py" />
+    <Compile Include="src\autonomous\right_start_right_scale\module1.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\autonomous\right_start_right_scale\path1.py" />
+    <Compile Include="src\autonomous\right_start_right_scale\path2.py" />
+    <Compile Include="src\autonomous\right_start_right_scale\path3.py" />
+    <Compile Include="src\autonomous\right_start_right_scale\path4.py" />
+    <Compile Include="src\autonomous\right_start_right_scale\path5.py" />
+    <Compile Include="src\autonomous\right_start_right_scale\path_combiner.py" />
+    <Compile Include="src\autonomous\right_start_right_scale\__init__.py" />
+    <Compile Include="src\autonomous\right_start_right_switch\path1.py" />
+    <Compile Include="src\autonomous\right_start_right_switch\__init__.py" />
+    <Compile Include="src\autonomous\__init__.py" />
+    <Compile Include="src\commands\boom_intake_to_scale_mp_generator.py" />
+    <Compile Include="src\commands\boom_intake_to_switch_mp_generator.py" />
+    <Compile Include="src\commands\boom_joystick.py" />
+    <Compile Include="src\commands\boom_switch_to_scale_mp_generator.py" />
+    <Compile Include="src\commands\boom_to_intake.py" />
+    <Compile Include="src\commands\boom_to_scale.py" />
+    <Compile Include="src\commands\boom_to_switch.py" />
+    <Compile Include="src\commands\close_intake.py" />
+    <Compile Include="src\commands\drive_joystick.py" />
+    <Compile Include="src\commands\intake_motors_in.py" />
+    <Compile Include="src\commands\intake_motors_out.py" />
+    <Compile Include="src\commands\intake_pneumatics_open_close.py" />
+    <Compile Include="src\commands\open_intake.py" />
+    <Compile Include="src\commands\shoot_cube_into_scale.py" />
+    <Compile Include="src\commands\shoot_cube_into_switch.py" />
+    <Compile Include="src\commands\start_intake.py" />
+    <Compile Include="src\commands\switch_auto_boom_to_intake.py" />
+    <Compile Include="src\commands\__init__.py" />
+    <Compile Include="src\constants.py" />
+    <Compile Include="src\oi.py" />
+    <Compile Include="src\robot.py" />
+    <Compile Include="src\subsystems\boom.py" />
+    <Compile Include="src\subsystems\drivetrain.py" />
+    <Compile Include="src\subsystems\intake_motors.py" />
+    <Compile Include="src\subsystems\intake_pneumatics.py" />
+    <Compile Include="src\subsystems\__init__.py" />
+    <Compile Include="src\utilities\characterize_drivetrain.py" />
+    <Compile Include="src\utilities\characterize_wheelbase.py" />
+    <Compile Include="src\utilities\data_logger.py" />
+    <Compile Include="src\utilities\drivetrain_mp_controller.py" />
+    <Compile Include="src\utilities\drivetrain_path_follower.py" />
+    <Compile Include="src\utilities\functions.py" />
+    <Compile Include="src\utilities\motion_profile_controller.py" />
+    <Compile Include="src\utilities\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src" />
+    <Folder Include="src\autonomous" />
+    <Folder Include="src\autonomous\forward" />
+    <Folder Include="src\autonomous\left_start_left_scale" />
+    <Folder Include="src\autonomous\left_start_left_switch" />
+    <Folder Include="src\autonomous\middle_start_left_switch" />
+    <Folder Include="src\autonomous\middle_start_right_switch" />
+    <Folder Include="src\autonomous\right_start_right_scale" />
+    <Folder Include="src\autonomous\right_start_right_switch" />
+    <Folder Include="src\commands" />
+    <Folder Include="src\subsystems" />
+    <Folder Include="src\utilities" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>

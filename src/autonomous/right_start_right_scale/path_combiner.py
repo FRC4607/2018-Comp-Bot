@@ -14,7 +14,7 @@ with open(os.path.join(os.path.dirname(__file__), 'path4.pickle'), "rb") as fp:
     path4 = pickle.load(fp)  
 
 
-def PathAppender(first_path, second_path, reverse=False):
+def PathAppender(first_path, second_path, pathNumber, reverse=False):
  
     if reverse:
         for i in range(len(second_path['left'])):    
@@ -30,33 +30,44 @@ def PathAppender(first_path, second_path, reverse=False):
         lastHeading = first_path['left'][-1][2]
       
     for i in range(len(second_path['left'])):
-        firstPoint = second_path['left'][0][2]
+        firstHeading = second_path['left'][0][2]
           
     for i in range(len(second_path['left'])):    
         second_path['left'][i][0] = second_path['left'][i][0] + lastPoint  
-        second_path['left'][i][2] = second_path['left'][i][2] - firstPoint + lastHeading
-          
+        second_path['left'][i][2] = second_path['left'][i][2] - firstHeading + lastHeading
+ 
+    for i in range(len(second_path['left'])):
+        second_path['left'][i].append(0)        
+        second_path['left'][0][4] = pathNumber
+
     for i in range(len(first_path['right'])):    
         lastPoint = first_path['right'][-1][0]      
         lastHeading = first_path['right'][-1][2]
       
     for i in range(len(second_path['right'])):
-        firstPoint = second_path['right'][0][2]
+        firstHeading = second_path['right'][0][2]
           
     for i in range(len(second_path['right'])):    
         second_path['right'][i][0] = second_path['right'][i][0] + lastPoint  
-        second_path['right'][i][2] = second_path['right'][i][2] - firstPoint + lastHeading 
+        second_path['right'][i][2] = second_path['right'][i][2] - firstHeading + lastHeading 
           
+    for i in range(len(second_path['right'])):
+        second_path['right'][i].append(0)
+        second_path['right'][0][4] = pathNumber
+
     for key in second_path:
        for data in (second_path[key]):       
            first_path[key].append(data)
 
+for i in range(len(path1['right'])):
+    path1['right'][i].append(0)
 
+for i in range(len(path1['left'])):
+    path1['left'][i].append(0)
 
-
-PathAppender(path1, path2, True)   
-PathAppender(path1, path3)
-PathAppender(path1, path4, True)
+PathAppender(path1, path2, 1, True)   
+PathAppender(path1, path3, 2)
+PathAppender(path1, path4, 3, True)
 
 for key in path1:
     for data in (path1[key]):
